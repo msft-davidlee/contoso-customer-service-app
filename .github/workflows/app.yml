@@ -33,6 +33,7 @@ jobs:
         name: Integration Tests
         run: |
             $unitTestFilePath = "${{ env.RUNNER_TEMP }}\TestResults\unittests.xml"
+            Push-Location .\DemoWebsiteTests\
             dotnet test --logger "junit;LogFilePath=$unitTestFilePath"
 
       - name: Publish test results
