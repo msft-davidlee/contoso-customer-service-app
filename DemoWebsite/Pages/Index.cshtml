@@ -1,0 +1,142 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Contoso Member Rewards Lookup";
+}
+
+@using DemoWebsite.Core;
+
+<div class="container">
+    @{
+        if (User.ShouldDisplayForRole(UserRoles.Agent) || User.ShouldDisplayForRole(UserRoles.Supervisor))
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                if (User.ShouldDisplayForRole(UserRoles.Agent))
+                {
+                    <input id="roleAgent" type="hidden" value="agent" />
+                    <div class="alert alert-primary" role="alert">
+                        Hello, you are signed in as an Agent. You can view customer points, but cannot redeem points. You can check redemption status i.e orders.
+                    </div>
+                }
+
+                if (User.ShouldDisplayForRole(UserRoles.Supervisor))
+                {
+                    <input id="roleSupervisor" type="hidden" value="supervisor" />
+                    <div class="alert alert-primary" role="alert">
+                        Hello, you are signed as a Supervisor. You can view customer points, redeem points and view redemption status i.e orders.
+                    </div>
+                }
+            }
+            else
+            {
+                <input id="roleSupervisor" type="hidden" value="supervisor" />
+            }
+
+            <h3>Member Rewards Lookup</h3>
+            <form>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="memberIdInput">Member Id</label>
+                            <input type="text" class="form-control" id="memberIdInput" placeholder="Member Id" />
+                        </div>
+                        <div class="form-group form-check">
+                            <input type="checkbox" class="form-check-input" id="useAlternateId">
+                            <label class="form-check-label" for="useAlternateId">Alternate Id</label>
+                        </div>
+                    </div>
+                    <div class="col">
+                    </div>
+                    <div class="col">
+                    </div>
+                </div>
+            </form>
+            <div class="defaultsplit"></div>
+            <div class="text-center">
+                <h2>OR</h2>
+            </div>
+            <form>
+                <div class="row">
+                    <div class="col">
+                        <label for="memberFirstNameInput">First Name</label>
+                        <input type="text" class="form-control" id="memberFirstNameInput" placeholder="Member First Name" />
+                    </div>
+                    <div class="col">
+                        <label for="memberLastNameInput">Last Name</label>
+                        <input type="text" class="form-control" id="memberLastNameInput" placeholder="Member Last Name" />
+                    </div>
+                    <div class="col">
+                        <button type="button" class="btn btn-primary" onclick="getUsers()">Lookup</button>
+                    </div>
+                </div>
+            </form>
+            <div class="defaultsplit"></div>
+            <div class="alert alert-secondary" role="alert" id="testDataMsg">
+
+            </div>
+
+            <h3>Member Rewards Points</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Member Id</th>
+                        <th scope="col">First Name</th>
+                        <th scope="col">Last Name</th>
+                        <th scope="col">Points</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="testData">
+                </tbody>
+            </table>
+
+            <div class="row">
+                <div class="col">
+                    <h3>Eligible Rewards</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Points</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="eligibleRewards">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col">
+                    <h3>Orders</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Order Id</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Ship Date</th>
+                                <th scope="col">Tracking Number</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        }
+        else
+        {
+            if (!User.IsB2C())
+            {
+                <h1 class="text-danger">You do not have access.</h1>
+                <h2 class="text-danger">Although you are authenticated, you are NOT authorized to view the content because you do not have a valid role assigned.</h2>
+            }
+            else
+            {
+                <p>You are currently signed in with B2C. Click <a href="/claims">here</a> to view your claims.</p>
+            }
+        }
+    }
+
+</div>

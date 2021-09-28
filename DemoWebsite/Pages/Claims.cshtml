@@ -1,0 +1,33 @@
+﻿@page
+@model DemoWebsite.Pages.ClaimsModel
+@{
+}
+<div class="container">
+    @{
+        if (User.Identity.IsAuthenticated)
+        {
+            <h3>Claims</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @{
+                        foreach (var claim in User.Claims)
+                        {
+                            <tr>
+                                <td>@claim.Type</td>
+                                <td>@claim.Value</td>
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+            </table>
+        }
+    }
+</div>
