@@ -31,25 +31,26 @@ if ($LastExitCode -ne 0) {
 
 # Build your app with ACR build command
 
+$namePrefix = "contoso-demo"
 $apps = @(
     @{
-        name = "demowebsite";
+        name = "$namePrefix-website";
         path = "DemoWebsite";
     },
     @{
-        name = "demo-alternate-id-service";
+        name = "$namePrefix-alternate-id-service";
         path = "DemoCustomerServiceAltId";
     },
     @{
-        name = "demo-partner-api";
+        name = "$namePrefix-partner-api";
         path = "DemoPartnerAPI";
     },
     @{
-        name = "demo-service-bus-shipping-func";
+        name = "$namePrefix-service-bus-shipping-func";
         path = "DemoServiceBusShippingFunc";
     },
     @{
-        name = "demo-storage-queue-func";
+        name = "$namePrefix-storage-queue-func";
         path = "DemoStorageShippingFunc";
     }
 )
