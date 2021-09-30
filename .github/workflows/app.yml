@@ -41,3 +41,19 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action/composite@v1
         with:
           files: ${{ env.RUNNER_TEMP }}/TestResults/*.xml
+
+      - name: Azure CLI Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.MS_AZURE_CREDENTIALS }}
+          enable-AzPSSession: true
+
+      - id: buid-and-deploy
+        name: Build Azure environment
+        working-directory: .\tools
+        run: |
+          .\Deployment\Build.ps1 -LOCATION ${{ secrets.LOCATION }} `
+            -BUILD_ENV ${{ needs.setup.outputs.build_env }} `
+            -RESOURCE_GROUP ${{ secrets.RESOURCE_GROUP }} `
+            -PREFIX ${{ secrets.PREFIX }} `
+            -GITHUB_REF ${{ github.ref }}
