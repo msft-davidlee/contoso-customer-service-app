@@ -50,7 +50,6 @@ jobs:
 
       - id: buid-and-deploy
         name: Build Azure environment
-        working-directory: .\tools
         run: |
           .\Deployment\Build.ps1 -LOCATION ${{ secrets.LOCATION }} `
             -BUILD_ENV ${{ needs.setup.outputs.build_env }} `
