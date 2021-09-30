@@ -8,6 +8,9 @@ param(
 $ErrorActionPreference = "Stop"
 
 $deploymentName = "deploy" + (Get-Date).ToString("yyyyMMddHHmmss")
+
+Write-Host "Attempting to run deployment $deploymentName"
+
 $rgName = "$RESOURCE_GROUP-$BUILD_ENV"
 $deployOutputText = (az deployment group create --name $deploymentName --resource-group $rgName --template-file Deployment/deploy.bicep --parameters `
         location=$LOCATION `
@@ -60,6 +63,8 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
 
     $appName = $app.name
     $path = $app.path
+
+    Write-Host "App: $appName"
 
     $imageName = "$appName`:$version"
     if (!$list -or !$list.Contains($imageName)) {
