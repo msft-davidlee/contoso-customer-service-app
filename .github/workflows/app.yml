@@ -48,11 +48,18 @@ jobs:
           creds: ${{ secrets.MS_AZURE_CREDENTIALS }}
           enable-AzPSSession: true
 
+      - name: deploy
+        id: deploy
+        uses: azure/arm-deploy@v1
+        with:
+          resourceGroupName: ${{ secrets.RESOURCE_GROUP }}-${{ needs.setup.outputs.build_env }}
+          template: ./deployment/deploy.bicep
+          parameters: |
+            location=${{ secrets.LOCATION }}
+            prefix=${{ secrets.PREFIX }}
+            appEnvironment=${{ needs.setup.outputs.build_env }}
+            branch=${{ github.ref }}
+
       - id: buid-and-deploy
         name: Build Azure environment
-        run: |
-          .\Deployment\Build.ps1 -LOCATION ${{ secrets.LOCATION }} `
-            -BUILD_ENV ${{ needs.setup.outputs.build_env }} `
-            -RESOURCE_GROUP ${{ secrets.RESOURCE_GROUP }} `
-            -PREFIX ${{ secrets.PREFIX }} `
-            -GITHUB_REF ${{ github.ref }}
+        run: .\Deployment\Build.ps1 -AcrName ${{ steps.deploy.outputs.acrName }}
