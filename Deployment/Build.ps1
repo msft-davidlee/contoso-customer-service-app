@@ -1,30 +1,14 @@
-param(
-    [string]$LOCATION,
-    [string]$BUILD_ENV,
-    [string]$RESOURCE_GROUP,
-    [string]$GITHUB_REF,
-    [string]$PREFIX)
+param([string]$AcrName)
 
 $ErrorActionPreference = "Stop"
 
-$deploymentName = "deploy" + (Get-Date).ToString("yyyyMMddHHmmss")
-$rgName = "$RESOURCE_GROUP-$BUILD_ENV"
-$deployOutputText = (az deployment group create --name $deploymentName --resource-group $rgName --template-file Deployment/deploy.bicep --parameters `
-        location=$LOCATION `
-        prefix=$PREFIX `
-        appEnvironment=$BUILD_ENV `
-        branch=$GITHUB_REF)
-
-$deployOutput = $deployOutputText | ConvertFrom-Json
-$acrName = $deployOutput.properties.outputs.acrName.value
-
 # Login to ACR
-az acr login --name $acrName
+az acr login --name $AcrName
 if ($LastExitCode -ne 0) {
     throw "An error has occured. Unable to login to acr."
 }
 
-$list = az acr repository list --name $acrName | ConvertFrom-Json
+$list = az acr repository list --name $AcrName | ConvertFrom-Json
 if ($LastExitCode -ne 0) {
     throw "An error has occured. Unable to list from repository"
 }
@@ -66,7 +50,7 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
 
     $imageName = "$appName`:$version"
     if (!$list -or !$list.Contains($imageName)) {
-        az acr build --image $imageName -r $acrName --file ./$path/Dockerfile .
+        az acr build --image $imageName -r $AcrName --file ./$path/Dockerfile .
     
         if ($LastExitCode -ne 0) {
             throw "An error has occured. Unable to build image."
