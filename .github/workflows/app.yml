@@ -48,7 +48,7 @@ jobs:
           creds: ${{ secrets.MS_AZURE_CREDENTIALS }}
           enable-AzPSSession: true
 
-      - name: deploy
+      - name: Build azure environment
         id: deploy
         uses: azure/arm-deploy@v1
         with:
@@ -57,5 +57,5 @@ jobs:
           parameters: location=${{ secrets.LOCATION }} prefix=${{ secrets.PREFIX }} appEnvironment=${{ needs.setup.outputs.build_env }} branch=${{ github.ref }}
 
       - id: buid-and-deploy
-        name: Build Azure environment
+        name: Build apps and container images
         run: .\Deployment\Build.ps1 -AcrName ${{ steps.deploy.outputs.acrName }}
