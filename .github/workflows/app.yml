@@ -55,9 +55,9 @@ jobs:
           resourceGroupName: ${{ secrets.RESOURCE_GROUP }}-${{ needs.setup.outputs.build_env }}
           template: ./deployment/deploy.bicep
           parameters: |
-            location=${{ secrets.LOCATION }}
-            prefix=${{ secrets.PREFIX }}
-            appEnvironment=${{ needs.setup.outputs.build_env }}
+            location=${{ secrets.LOCATION }} `
+            prefix=${{ secrets.PREFIX }} `
+            appEnvironment=${{ needs.setup.outputs.build_env }} `
             branch=${{ github.ref }}
 
       - id: buid-and-deploy
