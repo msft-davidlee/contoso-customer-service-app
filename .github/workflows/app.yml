@@ -58,10 +58,10 @@ jobs:
         id: deploy
         uses: azure/arm-deploy@v1
         with:
-          resourceGroupName: ${RESOURCE_GROUP_NAME}
+          resourceGroupName: ${{ env.RESOURCE_GROUP_NAME }}
           template: ./deployment/deploy.bicep
           parameters: containerName=apps location=${{ secrets.LOCATION }} prefix=${{ secrets.PREFIX }} appEnvironment=${{ needs.setup.outputs.build_env }} branch=${{ github.ref }}
 
       - id: buid-and-deploy
         name: Build apps and container images
-        run: .\Deployment\Build.ps1 -AcrName ${{ steps.deploy.outputs.acrName }} -AccountName ${{ steps.deploy.outputs.strName }} -ContainerName apps -ResourceGroup ${RESOURCE_GROUP_NAME}
+        run: .\Deployment\Build.ps1 -AcrName ${{ steps.deploy.outputs.acrName }} -AccountName ${{ steps.deploy.outputs.strName }} -ContainerName apps -ResourceGroup ${{ env.RESOURCE_GROUP_NAME }}
