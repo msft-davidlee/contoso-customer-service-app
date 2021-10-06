@@ -1,4 +1,4 @@
-param([string]$AcrName, [string]$AccountName, [string]$ContainerName, [string]$AccountKey)
+param([string]$AcrName, [string]$AccountName, [string]$ContainerName, [securestring]$AccountKey)
 
 $ErrorActionPreference = "Stop"
 
@@ -71,7 +71,9 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
     dotnet publish -c Release -o out
     Compress-Archive out\* -DestinationPath $appFileName -Force
 
-    azcopy_v10 copy $appFileName "https://$AccountName.blob.core.windows.net/$ContainerName/$appFileName?$sas" --overwrite=false
+    $url = "https://$AccountName.blob.core.windows.net/$ContainerName/$appFileName?$sas"
+    Write-Host "url: $url"
+    azcopy_v10 copy $appFileName $url --overwrite=false
 
     if ($LastExitCode -ne 0) {
         throw "An error has occured. Unable to deploy zip."
