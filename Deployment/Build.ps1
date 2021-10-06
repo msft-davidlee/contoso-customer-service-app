@@ -70,7 +70,8 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
 
     Push-Location $path
 
-    $appFileName = "$appName$version.zip"
+    $appFileName = ("$appName" + "$version.zip")
+    Write-Host "filename: $appFileName"
     dotnet publish -c Release -o out
     Compress-Archive out\* -DestinationPath $appFileName -Force
 
