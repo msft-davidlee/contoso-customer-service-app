@@ -39,6 +39,13 @@ $apps = @(
     }
 )
 
+$end = (Get-Date).AddDays(1).ToString("yyyy-MM-dd")
+$start = (Get-Date).ToString("yyyy-MM-dd")
+$sas = (az storage container generate-sas -n $ContainerName --account-name $AccountName --permissions racwl --expiry $end --start $start --https-only | ConvertFrom-Json)
+if ($LastExitCode -ne 0) {
+    throw "An error has occured. Unable to generate sas."
+}
+
 $version = "v1"
 for ($i = 0; $i -lt $apps.Length; $i++) {
     $app = $apps[$i]
@@ -63,10 +70,12 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
     dotnet publish -c Release -o out
     Compress-Archive out\* -DestinationPath $appFileName -Force
 
-    $end = (Get-Date).AddDays(1).ToString("yyyy-MM-dd")
-    $start = (Get-Date).ToString("yyyy-MM-dd")
-    $sas = (az storage container generate-sas -n $ContainerName --account-name $AccountName --permissions racwl --expiry $end --start $start --https-only | ConvertFrom-Json)
-    azcopy_v10 copy $appFileName "https://$AccountName.blob.core.windows.net/$ContainerName?$sas" --overwrite=false
+
+    azcopy_v10 copy $appFileName "https://$AccountName.blob.core.windows.net/$ContainerName/$appFileName?$sas" --overwrite=false
+
+    if ($LastExitCode -ne 0) {
+        throw "An error has occured. Unable to deploy zip."
+    }
 
     Pop-Location
 }
