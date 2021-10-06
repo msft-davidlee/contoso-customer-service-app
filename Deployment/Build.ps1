@@ -11,8 +11,6 @@ if (!$sas -or $LastExitCode -ne 0) {
     throw "An error has occured. Unable to generate sas."
 }
 
-Write-Host "SAS: $sas"
-
 # Login to ACR
 az acr login --name $AcrName
 if ($LastExitCode -ne 0) {
@@ -55,9 +53,7 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
     $app = $apps[$i]
 
     $appName = $app.name
-    $path = $app.path
-
-    Write-Host "app: $appName"
+    $path = $app.path    
 
     $imageName = "$appName`:$version"
     if (!$list -or !$list.Contains($imageName)) {
@@ -71,13 +67,11 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
     Push-Location $path
 
     $appFileName = ("$appName-$version" + ".zip")
-    Write-Host "appfilename: $appFileName"
     dotnet publish -c Release -o out
     Compress-Archive out\* -DestinationPath $appFileName -Force
 
     # Seem like question mark is causing appfilename to be removed
-    $url = "https://$AccountName.blob.core.windows.net/$ContainerName/" + $appFileName + "?$sas"
-    Write-Host "url: $url"
+    $url = "https://$AccountName.blob.core.windows.net/$ContainerName/" + $appFileName + "?$sas"    
     azcopy_v10 copy $appFileName $url --overwrite=false
 
     if ($LastExitCode -ne 0) {
