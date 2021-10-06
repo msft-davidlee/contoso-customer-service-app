@@ -55,4 +55,3 @@ resource blobServiceContainer 'Microsoft.Storage/storageAccounts/blobServices/co
 
 output acrName string = acr.name
 output strName string = str.name
-output strKey string = listKeys(str.id, str.apiVersion).keys[0].value
