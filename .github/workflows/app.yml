@@ -21,6 +21,8 @@ jobs:
     needs: setup
     environment: ${{ needs.setup.outputs.build_env }}
     runs-on: windows-latest
+    env:
+      RESOURCE_GROUP_NAME: ${{ secrets.RESOURCE_GROUP }}-${{ needs.setup.outputs.build_env }}    
     steps:
       - uses: actions/checkout@v2
 
@@ -42,6 +44,10 @@ jobs:
         with:
           files: ${{ env.RUNNER_TEMP }}/TestResults/*.xml
 
+      - uses: kheiakiyama/install-azcopy-action@v1
+        with:
+          version: 'v10'
+
       - name: Azure CLI Login
         uses: azure/login@v1
         with:
@@ -52,10 +58,10 @@ jobs:
         id: deploy
         uses: azure/arm-deploy@v1
         with:
-          resourceGroupName: ${{ secrets.RESOURCE_GROUP }}-${{ needs.setup.outputs.build_env }}
+          resourceGroupName: ${{ env.RESOURCE_GROUP_NAME }}
           template: ./deployment/deploy.bicep
-          parameters: location=${{ secrets.LOCATION }} prefix=${{ secrets.PREFIX }} appEnvironment=${{ needs.setup.outputs.build_env }} branch=${{ github.ref }}
+          parameters: containerName=apps location=${{ secrets.LOCATION }} prefix=${{ secrets.PREFIX }} appEnvironment=${{ needs.setup.outputs.build_env }} branch=${{ github.ref }}
 
       - id: buid-and-deploy
         name: Build apps and container images
-        run: .\Deployment\Build.ps1 -AcrName ${{ steps.deploy.outputs.acrName }}
+        run: .\Deployment\Build.ps1 -AcrName ${{ steps.deploy.outputs.acrName }} -AccountName ${{ steps.deploy.outputs.strName }} -ContainerName apps -ResourceGroup ${{ env.RESOURCE_GROUP_NAME }}

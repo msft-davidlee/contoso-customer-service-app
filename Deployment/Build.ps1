@@ -1,6 +1,15 @@
-param([string]$AcrName)
+param([string]$AcrName, [string]$AccountName, [string]$ContainerName, [string]$ResourceGroup)
 
 $ErrorActionPreference = "Stop"
+
+# Generate SAS upfront
+$AccountKey = (az storage account keys list -g sharedservices-dev -n $AccountName | ConvertFrom-Json)[0].value
+$end = (Get-Date).AddDays(1).ToString("yyyy-MM-dd")
+$start = (Get-Date).ToString("yyyy-MM-dd")
+$sas = (az storage container generate-sas -n $ContainerName --account-name $AccountName --account-key $AccountKey --permissions racwl --expiry $end --start $start --https-only | ConvertFrom-Json)
+if (!$sas -or $LastExitCode -ne 0) {
+    throw "An error has occured. Unable to generate sas."
+}
 
 # Login to ACR
 az acr login --name $AcrName
@@ -44,9 +53,7 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
     $app = $apps[$i]
 
     $appName = $app.name
-    $path = $app.path
-
-    Write-Host "App: $appName"
+    $path = $app.path    
 
     $imageName = "$appName`:$version"
     if (!$list -or !$list.Contains($imageName)) {
@@ -56,4 +63,20 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
             throw "An error has occured. Unable to build image."
         }
     }
+
+    Push-Location $path
+
+    $appFileName = ("$appName-$version" + ".zip")
+    dotnet publish -c Release -o out
+    Compress-Archive out\* -DestinationPath $appFileName -Force
+
+    # Seem like question mark is causing appfilename to be removed
+    $url = "https://$AccountName.blob.core.windows.net/$ContainerName/" + $appFileName + "?$sas"    
+    azcopy_v10 copy $appFileName $url --overwrite=false
+
+    if ($LastExitCode -ne 0) {
+        throw "An error has occured. Unable to deploy zip."
+    }
+
+    Pop-Location
 }
