@@ -75,7 +75,8 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
     dotnet publish -c Release -o out
     Compress-Archive out\* -DestinationPath $appFileName -Force
 
-    $url = "https://$AccountName.blob.core.windows.net/$ContainerName/$appFileName?$sas"
+    # Seem like question mark is causing appfilename to be removed
+    $url = "https://$AccountName.blob.core.windows.net/$ContainerName/" + $appFileName + "?$sas"
     Write-Host "url: $url"
     azcopy_v10 copy $appFileName $url --overwrite=false
 
