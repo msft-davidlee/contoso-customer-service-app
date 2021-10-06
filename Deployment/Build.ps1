@@ -2,6 +2,14 @@ param([string]$AcrName, [string]$AccountName, [string]$ContainerName)
 
 $ErrorActionPreference = "Stop"
 
+# Generate SAS upfront
+$end = (Get-Date).AddDays(1).ToString("yyyy-MM-dd")
+$start = (Get-Date).ToString("yyyy-MM-dd")
+$sas = (az storage container generate-sas -n $ContainerName --account-name $AccountName --permissions racwl --expiry $end --start $start --https-only | ConvertFrom-Json)
+if (!$sas -or $LastExitCode -ne 0) {
+    throw "An error has occured. Unable to generate sas."
+}
+
 # Login to ACR
 az acr login --name $AcrName
 if ($LastExitCode -ne 0) {
@@ -39,13 +47,6 @@ $apps = @(
     }
 )
 
-$end = (Get-Date).AddDays(1).ToString("yyyy-MM-dd")
-$start = (Get-Date).ToString("yyyy-MM-dd")
-$sas = (az storage container generate-sas -n $ContainerName --account-name $AccountName --permissions racwl --expiry $end --start $start --https-only | ConvertFrom-Json)
-if ($LastExitCode -ne 0) {
-    throw "An error has occured. Unable to generate sas."
-}
-
 $version = "v1"
 for ($i = 0; $i -lt $apps.Length; $i++) {
     $app = $apps[$i]
@@ -69,7 +70,6 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
     $appFileName = "$appName$version.zip"
     dotnet publish -c Release -o out
     Compress-Archive out\* -DestinationPath $appFileName -Force
-
 
     azcopy_v10 copy $appFileName "https://$AccountName.blob.core.windows.net/$ContainerName/$appFileName?$sas" --overwrite=false
 
