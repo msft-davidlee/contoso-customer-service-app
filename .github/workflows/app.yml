@@ -62,4 +62,4 @@ jobs:
 
       - id: buid-and-deploy
         name: Build apps and container images
-        run: .\Deployment\Build.ps1 -AcrName ${{ steps.deploy.outputs.acrName }} -AccountName ${{ steps.deploy.outputs.strName }} -ContainerName apps
+        run: .\Deployment\Build.ps1 -AcrName ${{ steps.deploy.outputs.acrName }} -AccountName ${{ steps.deploy.outputs.strName }} -AccountKey ${{ steps.deploy.outputs.strKey }} -ContainerName apps

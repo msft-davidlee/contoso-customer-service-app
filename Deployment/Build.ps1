@@ -1,11 +1,11 @@
-param([string]$AcrName, [string]$AccountName, [string]$ContainerName)
+param([string]$AcrName, [string]$AccountName, [string]$ContainerName, [string]$AccountKey)
 
 $ErrorActionPreference = "Stop"
 
 # Generate SAS upfront
 $end = (Get-Date).AddDays(1).ToString("yyyy-MM-dd")
 $start = (Get-Date).ToString("yyyy-MM-dd")
-$sas = (az storage container generate-sas -n $ContainerName --account-name $AccountName --permissions racwl --expiry $end --start $start --https-only | ConvertFrom-Json)
+$sas = (az storage container generate-sas -n $ContainerName --account-name $AccountName --account-key $AccountKey --permissions racwl --expiry $end --start $start --https-only | ConvertFrom-Json)
 if (!$sas -or $LastExitCode -ne 0) {
     throw "An error has occured. Unable to generate sas."
 }
