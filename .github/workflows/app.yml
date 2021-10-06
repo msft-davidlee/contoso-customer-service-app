@@ -42,6 +42,10 @@ jobs:
         with:
           files: ${{ env.RUNNER_TEMP }}/TestResults/*.xml
 
+      - uses: kheiakiyama/install-azcopy-action@v1
+        with:
+          version: 'v10'
+
       - name: Azure CLI Login
         uses: azure/login@v1
         with:
@@ -54,8 +58,8 @@ jobs:
         with:
           resourceGroupName: ${{ secrets.RESOURCE_GROUP }}-${{ needs.setup.outputs.build_env }}
           template: ./deployment/deploy.bicep
-          parameters: location=${{ secrets.LOCATION }} prefix=${{ secrets.PREFIX }} appEnvironment=${{ needs.setup.outputs.build_env }} branch=${{ github.ref }}
+          parameters: containerName=apps location=${{ secrets.LOCATION }} prefix=${{ secrets.PREFIX }} appEnvironment=${{ needs.setup.outputs.build_env }} branch=${{ github.ref }}
 
       - id: buid-and-deploy
         name: Build apps and container images
-        run: .\Deployment\Build.ps1 -AcrName ${{ steps.deploy.outputs.acrName }}
+        run: .\Deployment\Build.ps1 -AcrName ${{ steps.deploy.outputs.acrName }} -AccountName ${{ steps.deploy.outputs.strName }} -ContainerName apps
