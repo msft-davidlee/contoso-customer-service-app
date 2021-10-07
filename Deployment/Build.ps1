@@ -3,7 +3,7 @@ param([string]$AcrName, [string]$AccountName, [string]$ContainerName, [string]$R
 $ErrorActionPreference = "Stop"
 
 # Generate SAS upfront
-$AccountKey = (az storage account keys list -g sharedservices-dev -n $AccountName | ConvertFrom-Json)[0].value
+$AccountKey = (az storage account keys list -g $ResourceGroup -n $AccountName | ConvertFrom-Json)[0].value
 $end = (Get-Date).AddDays(1).ToString("yyyy-MM-dd")
 $start = (Get-Date).ToString("yyyy-MM-dd")
 $sas = (az storage container generate-sas -n $ContainerName --account-name $AccountName --account-key $AccountKey --permissions racwl --expiry $end --start $start --https-only | ConvertFrom-Json)
