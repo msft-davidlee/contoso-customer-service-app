@@ -41,10 +41,14 @@ The technology stack used includes .NET Core 3.1, MS SSQL, Azure Storage Queue, 
 3. The security of the web app is taken care of using Identity Providers rather than a custom authentication approach (think asp.net forms authentication where we end up creating our own identity store in the olden days). A third party approach like AAD B2B or B2C means Contoso can get developers to focus on business problems and leave authentication and authorization to the experts.
 
 # Get Started
-If you are interested to run this Solution, you will need to make sure you have the Azurite emulator, and a local instance of SQL Server running. I recommand installing Docker Desktop so you can install these dependencies which is the easist way to get started. Once you have configured Docker Desktop, you can run the following which uses Docker to install Storage and SQL dependencies.
+If you are interested to run this Solution locally as a Developer, you will need to make sure you have the Azurite emulator, and a local instance of SQL Server running. I recommand installing Docker Desktop so you can install these dependencies which is the easist way to get started. Once you have configured Docker Desktop, you can run the following which uses Docker to install Storage and SQL dependencies.
 
 ```
 .\LocalEnv\Install.ps1 -Password <Password>
 ```
+
+# DevOps Pipeline
+There is a azure-pipelines.yml file which you can use if you want to demo a connection from GitHub Repository to Azure Pipeline. As such, you are not using Azure Repo, but GitHub to store your code which gives you an advantage of having the ability to do code scanning using GitHub CodeQL.
+
 ## Have an issue?
 You are welcome to create an issue if you need help but please note that there is no timeline to answer or resolve any issues you have with the contents of this project. Use the contents of this project at your own risk! If you are interested to volunteer to maintain this, please feel free to reach out to be added as a contributor and send Pull Requests (PR).
