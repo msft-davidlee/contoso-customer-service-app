@@ -69,7 +69,8 @@ namespace DemoPartnerAPI
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
+            // TODO: Make this configurable.
+            //app.UseHttpsRedirection();
 
             app.UseRouting();
 
