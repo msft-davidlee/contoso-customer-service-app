@@ -60,7 +60,7 @@ jobs:
         with:
           resourceGroupName: ${{ env.RESOURCE_GROUP_NAME }}
           template: ./deployment/deploy.bicep
-          parameters: containerName=apps location=${{ secrets.LOCATION }} prefix=${{ secrets.PREFIX }} appEnvironment=${{ needs.setup.outputs.build_env }} branch=${{ github.ref }}
+          parameters: containerName=apps prefix=${{ secrets.PREFIX }} appEnvironment=${{ needs.setup.outputs.build_env }} branch=${{ github.ref }}
 
       - id: buid-and-deploy
         name: Build apps and container images

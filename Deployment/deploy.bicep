@@ -1,12 +1,12 @@
 param prefix string
 param appEnvironment string
 param branch string
-param location string
+param location string = 'centralus'
 param containerName string
 
-var stackName = '${prefix}${appEnvironment}'
+var stackName = toLower('${prefix}-${appEnvironment}')
 var tags = {
-  'stack-name': stackName
+  'stack-name': 'platform-v2'
   'environment': appEnvironment
   'branch': branch
   'team': 'platform'
