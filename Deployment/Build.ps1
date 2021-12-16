@@ -53,9 +53,16 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
     $app = $apps[$i]
 
     $appName = $app.name
-    $path = $app.path    
+    $path = $app.path
 
-    $imageName = "$appName`:$version"
+    if (Test-Path ./$path/version.txt) {
+        $appVersion = Get-Content ./$path/version.txt
+    }
+    else {
+        $appVersion = $version
+    }
+
+    $imageName = "$appName`:$appVersion"
     if (!$list -or !$list.Contains($imageName)) {
         az acr build --image $imageName -r $AcrName --file ./$path/Dockerfile .
     
@@ -66,7 +73,7 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
 
     Push-Location $path
 
-    $appFileName = ("$appName-$version" + ".zip")
+    $appFileName = ("$appName-$appVersion" + ".zip")
     dotnet publish -c Release -o out
     Compress-Archive out\* -DestinationPath $appFileName -Force
 
