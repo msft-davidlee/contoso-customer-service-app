@@ -13,6 +13,7 @@ using Microsoft.Identity.Web.UI;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
+using System;
 
 namespace DemoWebsite
 {
@@ -25,20 +26,33 @@ namespace DemoWebsite
 
         public IConfiguration Configuration { get; }
 
+        private bool IsForwardHeaderEnabled()
+        {
+            return string.Equals(Environment.GetEnvironmentVariable("ASPNETCORE_FORWARDEDHEADERS_ENABLED"), "true", StringComparison.OrdinalIgnoreCase);
+        }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddLogging();
 
-            if (IsAuth())
+            // https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/proxy-load-balancer?view=aspnetcore-6.0#forward-the-scheme-for-linux-and-non-iis-reverse-proxies
+            if (IsForwardHeaderEnabled())
             {
-                // see: https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/proxy-load-balancer?view=aspnetcore-6.0
                 services.Configure<ForwardedHeadersOptions>(options =>
                 {
-                    options.ForwardedHeaders =
-                        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor |
+                        ForwardedHeaders.XForwardedProto;
+                    // Only loopback proxies are allowed by default.
+                    // Clear that restriction because forwarders are enabled by explicit 
+                    // configuration.
+                    options.KnownNetworks.Clear();
+                    options.KnownProxies.Clear();
                 });
+            }
 
+            if (IsAuth())
+            {
                 if (ConfigureForB2C())
                 {
                     services.AddMicrosoftIdentityWebAppAuthentication(Configuration, "AzureAd")
@@ -103,13 +117,18 @@ namespace DemoWebsite
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseForwardedHeaders();
+
+                if (IsForwardHeaderEnabled())
+                    app.UseForwardedHeaders();
             }
             else
             {
                 app.UseExceptionHandler("/Error");
+
+                if (IsForwardHeaderEnabled())
+                    app.UseForwardedHeaders();
+
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseForwardedHeaders();
                 app.UseHsts();
             }
 
