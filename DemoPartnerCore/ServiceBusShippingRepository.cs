@@ -1,4 +1,5 @@
-﻿using Azure.Storage.Queues;
+﻿using Azure.Messaging.ServiceBus;
+using Azure.Storage.Queues;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
@@ -24,11 +25,11 @@ namespace DemoPartnerCore
                 connectionString = File.ReadAllText(filePath);
             }
 
-            var queueClient = new QueueClient(connectionString, _configuration["QueueName"]);
-
+            var queueClient = new ServiceBusClient(connectionString);
+            var sender = queueClient.CreateSender(_configuration["QueueName"]);
             if (IsQueueDeplayDisabled())
             {
-                await queueClient.SendMessageAsync(orderId.ToString());
+                await sender.SendMessageAsync(new ServiceBusMessage(orderId.ToString()));
 
                 return 0;
             }
@@ -37,8 +38,7 @@ namespace DemoPartnerCore
             // This can take anywhere from 20 seconds to 1 minute.
             var rand = new Random();
             int result = rand.Next(20, 60);
-            await queueClient.SendMessageAsync(orderId.ToString(),
-                TimeSpan.FromSeconds(result));
+            await sender.SendMessageAsync(new ServiceBusMessage(orderId.ToString()) { ScheduledEnqueueTime = DateTime.UtcNow.AddSeconds(TimeSpan.FromSeconds(result).TotalSeconds) });
 
             return result;
         }
