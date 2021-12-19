@@ -48,13 +48,6 @@ namespace DemoWebsite
                     // configuration.
                     options.KnownNetworks.Clear();
                     options.KnownProxies.Clear();
-
-                    var allowedHosts = Configuration["AllowedHosts"];
-                    if (!string.IsNullOrEmpty(allowedHosts))
-                    {
-                        // See: https://www.phillipsj.net/posts/using-azure-front-door-with-dotnet-core/
-                        options.AllowedHosts = allowedHosts.Split(',');
-                    }
                 });
             }
 
