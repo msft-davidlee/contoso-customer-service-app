@@ -48,6 +48,13 @@ namespace DemoWebsite
                     // configuration.
                     options.KnownNetworks.Clear();
                     options.KnownProxies.Clear();
+
+                    var allowedHosts = Configuration["AllowedHosts"];
+                    if (!string.IsNullOrEmpty(allowedHosts))
+                    {
+                        // See: https://www.phillipsj.net/posts/using-azure-front-door-with-dotnet-core/
+                        options.AllowedHosts = allowedHosts.Split(',');
+                    }
                 });
             }
 
@@ -111,26 +118,6 @@ namespace DemoWebsite
             }
         }
 
-        private void ConfigureOverrideHostProtocolWithHttps(IApplicationBuilder app)
-        {
-            if (IsForwardHeaderEnabled())
-            {
-                var host = Configuration["OverrideHostProtocolWithHttps"];
-                if (!string.IsNullOrEmpty(host))
-                {
-                    app.Use((context, next) =>
-                    {
-                        if (context.Request.Host.HasValue && host.Equals(context.Request.Host.Value, StringComparison.InvariantCultureIgnoreCase))
-                        {
-                            context.Request.Protocol = "https";
-                        }
-
-                        return next();
-                    });
-                }
-            }
-        }
-
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -140,8 +127,6 @@ namespace DemoWebsite
 
                 if (IsForwardHeaderEnabled())
                     app.UseForwardedHeaders();
-
-                ConfigureOverrideHostProtocolWithHttps(app);
             }
             else
             {
@@ -149,8 +134,6 @@ namespace DemoWebsite
 
                 if (IsForwardHeaderEnabled())
                     app.UseForwardedHeaders();
-
-                ConfigureOverrideHostProtocolWithHttps(app);
 
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
