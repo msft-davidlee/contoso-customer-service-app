@@ -1,10 +1,11 @@
 ﻿@using DemoWebsite.Core;
+@inject IManagedConfiguration Configuration
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Contoso Customer Service Portal V1.0</title>
+    <title>@ViewData["Title"] - Contoso Customer Service Rewards Lookup @Configuration.Version</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
@@ -52,7 +53,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; @DateTime.Now.Year - Contoso Member Rewards Lookup - <a asp-area="" asp-page="/Privacy">Privacy</a> | V1.0
+            &copy; @DateTime.Now.Year - Contoso Customer Service Rewards Lookup | @Configuration.Version | @Configuration.MachineName
         </div>
     </footer>
 
