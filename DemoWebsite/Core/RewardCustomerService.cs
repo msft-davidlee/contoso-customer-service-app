@@ -1,12 +1,14 @@
 ﻿using DemoWebsite.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DemoWebsite.Core
 {
-    public class RewardCustomerService : IRewardCustomerService
+    public class RewardCustomerService : IRewardCustomerService, IHealthCheck
     {
         private readonly IDbServiceFactory _dbService;
         public RewardCustomerService(IDbServiceFactory dbService)
@@ -37,6 +39,19 @@ namespace DemoWebsite.Core
         public async Task UpdateRewardCustomer()
         {
             await _dbService.GetDbContext().SaveChangesAsync();
+        }
+
+        public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                await _dbService.GetDbContext().Database.ExecuteSqlRawAsync("SELECT 1");
+                return HealthCheckResult.Healthy();
+            }
+            catch
+            {
+                return HealthCheckResult.Unhealthy();
+            }
         }
     }
 }

@@ -103,6 +103,11 @@ namespace DemoWebsite
             services.AddTransient<IProductService, ProductService>();
             services.AddTransient<IOrderService, HttpOrderService>();
             services.AddTransient<IAlternateIdService, HttpAlternateIdService>();
+
+            services.AddHealthChecks()
+                .AddCheck<RewardCustomerService>("Database")
+                .AddCheck<HttpAlternateIdService>("HttpAlternateIdService");
+
             var svc = services.AddRazorPages();
 
             if (IsAuth())
@@ -151,6 +156,7 @@ namespace DemoWebsite
             {
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health").AllowAnonymous();
             });
         }
 
