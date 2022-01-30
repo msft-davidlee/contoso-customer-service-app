@@ -1,14 +1,14 @@
 ﻿using Azure.Messaging.ServiceBus;
-using Azure.Storage.Queues;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System;
 using System.IO;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DemoPartnerCore
 {
-    public class ServiceBusShippingRepository : IShippingRepository
+    public class ServiceBusShippingRepository : IShippingRepository, IHealthCheck
     {
         private readonly IConfiguration _configuration;
         public ServiceBusShippingRepository(IConfiguration configuration)
@@ -16,7 +16,7 @@ namespace DemoPartnerCore
             _configuration = configuration;
         }
 
-        public async Task<int> Add(Guid orderId)
+        private ServiceBusClient GetServiceBusClient()
         {
             string connectionString = _configuration["QueueConnectionString"];
             if (connectionString.StartsWith("FilePath="))
@@ -25,7 +25,13 @@ namespace DemoPartnerCore
                 connectionString = File.ReadAllText(filePath);
             }
 
-            var queueClient = new ServiceBusClient(connectionString);
+            return new ServiceBusClient(connectionString);
+        }
+
+        public async Task<int> Add(Guid orderId)
+        {
+            var queueClient = GetServiceBusClient();
+
             var sender = queueClient.CreateSender(_configuration["QueueName"]);
             if (IsQueueDeplayDisabled())
             {
@@ -55,6 +61,19 @@ namespace DemoPartnerCore
                 }
             }
             return false;
+        }
+
+        public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var client = GetServiceBusClient();
+                return Task.FromResult(HealthCheckResult.Healthy());
+            }
+            catch
+            {
+                return Task.FromResult(HealthCheckResult.Unhealthy());
+            }
         }
     }
 }

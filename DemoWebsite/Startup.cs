@@ -106,7 +106,8 @@ namespace DemoWebsite
 
             services.AddHealthChecks()
                 .AddCheck<RewardCustomerService>("Database")
-                .AddCheck<HttpAlternateIdService>("HttpAlternateIdService");
+                .AddCheck<HttpAlternateIdService>("AlternateIdService")
+                .AddCheck<ProductService>("ProductService");
 
             var svc = services.AddRazorPages();
 

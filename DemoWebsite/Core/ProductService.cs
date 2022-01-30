@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DemoWebsite.Core
@@ -11,7 +13,7 @@ namespace DemoWebsite.Core
         Task<bool> IsInStock(string productId);
     }
 
-    public class ProductService : IProductService
+    public class ProductService : IProductService, IHealthCheck
     {
         private readonly IConfiguration _configuration;
         private static readonly HttpClient _client = new HttpClient();
@@ -48,6 +50,29 @@ namespace DemoWebsite.Core
             }
 
             throw new ApplicationException("PartnerAPIUri is not configured.");
+        }
+
+        public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+        {
+            var partnerApiUri = _configuration["PartnerAPIUri"];
+            if (string.IsNullOrEmpty(partnerApiUri))
+            {
+                return HealthCheckResult.Unhealthy();
+            }
+
+            var uri = $"{partnerApiUri}/health";
+
+            try
+            {
+                var response = await _client.GetAsync(new Uri(uri));
+                response.EnsureSuccessStatusCode();
+
+                return HealthCheckResult.Healthy();
+            }
+            catch
+            {
+                return HealthCheckResult.Unhealthy();
+            }
         }
     }
 }

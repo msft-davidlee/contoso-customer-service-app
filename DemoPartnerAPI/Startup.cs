@@ -43,15 +43,20 @@ namespace DemoPartnerAPI
             services.AddTransient<IOrderService, OrderService>();
             services.AddTransient<IShippingService, ShippingService>();
 
+            var healthChecks = services.AddHealthChecks()
+                .AddCheck<ProductService>("Database");
+
             string shippingRepositoryType = Configuration["ShippingRepositoryType"];
             switch (shippingRepositoryType)
             {
                 case "Storage":
                     services.AddTransient<IShippingRepository, StorageQueueShippingRepository>();
+                    healthChecks.AddCheck<StorageQueueShippingRepository>("Queue");
                     break;
 
                 case "ServiceBus":
                     services.AddTransient<IShippingRepository, ServiceBusShippingRepository>();
+                    healthChecks.AddCheck<ServiceBusShippingRepository>("Queue");
                     break;
 
                 default:
@@ -79,6 +84,7 @@ namespace DemoPartnerAPI
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health").AllowAnonymous();
             });
         }
     }
