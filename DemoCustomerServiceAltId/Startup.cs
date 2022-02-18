@@ -2,18 +2,11 @@ using DemoCustomerServiceAltId.Core;
 using DemoCustomerServiceAltId.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DemoCustomerServiceAltId
 {
@@ -46,6 +39,10 @@ namespace DemoCustomerServiceAltId
             });
             services.AddTransient<IDbServiceFactory, DbServiceFactory>();
             services.AddTransient<IAlternateIdService, AlternateIdService>();
+
+            services.AddHealthChecks()
+                .AddCheck<AlternateIdService>("Database");
+
             services.AddControllers();
         }
 
@@ -66,6 +63,7 @@ namespace DemoCustomerServiceAltId
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health").AllowAnonymous();
             });
         }
     }

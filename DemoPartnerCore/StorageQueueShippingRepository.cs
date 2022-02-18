@@ -1,13 +1,15 @@
 ﻿using Azure.Storage.Queues;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DemoPartnerCore
 {
-    public class StorageQueueShippingRepository : IShippingRepository
+    public class StorageQueueShippingRepository : IShippingRepository, IHealthCheck
     {
         private readonly IConfiguration _configuration;
 
@@ -16,7 +18,7 @@ namespace DemoPartnerCore
             _configuration = configuration;
         }
 
-        public async Task<int> Add(Guid orderId)
+        private QueueClient GetQueueClient()
         {
             string connectionString = _configuration["QueueConnectionString"];
             if (connectionString.StartsWith("FilePath="))
@@ -25,7 +27,13 @@ namespace DemoPartnerCore
                 connectionString = File.ReadAllText(filePath);
             }
 
-            var queueClient = new QueueClient(connectionString, _configuration["QueueName"]);
+            return new QueueClient(connectionString, _configuration["QueueName"]);
+        }
+
+        public async Task<int> Add(Guid orderId)
+        {
+            var queueClient = GetQueueClient();
+
             var base64message = Convert.ToBase64String(Encoding.UTF8.GetBytes(orderId.ToString()));
 
             if (IsQueueDeplayDisabled())
@@ -42,6 +50,20 @@ namespace DemoPartnerCore
             await queueClient.SendMessageAsync(base64message, TimeSpan.FromSeconds(result));
 
             return result;
+        }
+
+        public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+        {
+            var queueClient = GetQueueClient();
+            try
+            {
+                await queueClient.GetPropertiesAsync();
+                return HealthCheckResult.Healthy();
+            }
+            catch
+            {
+                return HealthCheckResult.Unhealthy();
+            }
         }
 
         private bool IsQueueDeplayDisabled()
