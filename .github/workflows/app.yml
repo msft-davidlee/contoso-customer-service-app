@@ -1,8 +1,27 @@
-on: push
+on: 
+  push:
+    paths-ignore: 
+      - 'README.md'
 
 jobs:
+  setup:
+    name: Choose Secrets Environment Job
+    runs-on: windows-latest
+    steps:
+      - id: setup
+        name: Setup Environment Setp
+        run: |
+            if ('${{ github.ref }}' -eq 'refs/heads/main') { 
+              echo "::set-output name=build_env::prod"
+            } else {
+              echo "::set-output name=build_env::dev"
+            }
+    outputs:
+      build_env: ${{ steps.setup.outputs.build_env }}
+
   build_deploy:
-    name: Build and Deploy    
+    name: Build and Deploy 
+    needs: setup   
     runs-on: windows-latest  
     steps:
       - uses: actions/checkout@v2
@@ -37,4 +56,4 @@ jobs:
 
       - id: buid-and-deploy
         name: Build apps and container images
-        run: .\Deployment\Build.ps1
+        run: .\Deployment\Build.ps1 -BUILD_ENV ${{ needs.setup.outputs.build_env }}

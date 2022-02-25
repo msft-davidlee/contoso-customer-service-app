@@ -1,3 +1,6 @@
+param(
+    [string]$BUILD_ENV)
+
 $ErrorActionPreference = "Stop"
 
 $platformRes = (az resource list --tag stack-name=platform --tag stack-environment=prod | ConvertFrom-Json)
@@ -82,6 +85,11 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
     }
 
     $imageName = "$appName`:$appVersion"
+
+    if ($BUILD_ENV -eq 'dev') {
+        $imageName = "$imageName-$BUILD_ENV"
+    }    
+
     if (!$list -or !$list.Contains($imageName)) {
         az acr build --image $imageName -r $AcrName --file ./$path/Dockerfile .
     
