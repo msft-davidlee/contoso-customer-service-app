@@ -2,8 +2,7 @@ on: push
 
 jobs:
   build_deploy:
-    name: Build and Deploy
-    needs: setup
+    name: Build and Deploy    
     runs-on: windows-latest  
     steps:
       - uses: actions/checkout@v2
