@@ -19,12 +19,13 @@ if (!$str) {
     throw "Unable to find eligible storage account!"
 }
 $AccountName = $str.Name
+$ContainerName = "apps"
 
 # Generate SAS upfront
 $AccountKey = (az storage account keys list -g $str.ResourceGroup -n $AccountName | ConvertFrom-Json)[0].value
 $end = (Get-Date).AddDays(1).ToString("yyyy-MM-dd")
 $start = (Get-Date).ToString("yyyy-MM-dd")
-$sas = (az storage container generate-sas -n apps --account-name $AccountName --account-key $AccountKey --permissions racwl --expiry $end --start $start --https-only | ConvertFrom-Json)
+$sas = (az storage container generate-sas -n $ContainerName --account-name $AccountName --account-key $AccountKey --permissions racwl --expiry $end --start $start --https-only | ConvertFrom-Json)
 if (!$sas -or $LastExitCode -ne 0) {
     throw "An error has occured. Unable to generate sas."
 }
