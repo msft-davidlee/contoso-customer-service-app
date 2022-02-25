@@ -100,7 +100,13 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
 
     Push-Location $path
 
-    $appFileName = ("$appName-$appVersion" + ".zip")
+    if ($BUILD_ENV -eq 'dev') {
+        $appFileName = ("$appName-$appVersion-dev" + ".zip")
+    }
+    else {
+        $appFileName = ("$appName-$appVersion" + ".zip")
+    }
+    
     dotnet publish -c Release -o out
     Compress-Archive out\* -DestinationPath $appFileName -Force
 
