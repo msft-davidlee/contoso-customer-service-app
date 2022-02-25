@@ -1,12 +1,30 @@
-param([string]$AcrName, [string]$AccountName, [string]$ContainerName, [string]$ResourceGroup)
-
 $ErrorActionPreference = "Stop"
 
+$platformRes = (az resource list --tag stack-name=platform --tag stack-environment=prod | ConvertFrom-Json)
+if (!$platformRes) {
+    throw "Unable to find eligible platform resources!"
+}
+if ($platformRes.Length -eq 0) {
+    throw "Unable to find 'ANY' eligible platform resources!"
+}
+
+$acr = ($platformRes | Where-Object { $_.type -eq "Microsoft.ContainerRegistry/registries" })
+if (!$acr) {
+    throw "Unable to find eligible platform container registry!"
+}
+$AcrName = $acr.Name
+
+$str = ($platformRes | Where-Object { $_.type -eq "Microsoft.Storage/storageAccounts" })
+if (!$str) {
+    throw "Unable to find eligible storage account!"
+}
+$AccountName = $str.Name
+
 # Generate SAS upfront
-$AccountKey = (az storage account keys list -g $ResourceGroup -n $AccountName | ConvertFrom-Json)[0].value
+$AccountKey = (az storage account keys list -g $str.ResourceGroup -n $AccountName | ConvertFrom-Json)[0].value
 $end = (Get-Date).AddDays(1).ToString("yyyy-MM-dd")
 $start = (Get-Date).ToString("yyyy-MM-dd")
-$sas = (az storage container generate-sas -n $ContainerName --account-name $AccountName --account-key $AccountKey --permissions racwl --expiry $end --start $start --https-only | ConvertFrom-Json)
+$sas = (az storage container generate-sas -n apps --account-name $AccountName --account-key $AccountKey --permissions racwl --expiry $end --start $start --https-only | ConvertFrom-Json)
 if (!$sas -or $LastExitCode -ne 0) {
     throw "An error has occured. Unable to generate sas."
 }

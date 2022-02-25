@@ -47,6 +47,9 @@ If you are interested to run this Solution locally as a Developer, you will need
 .\LocalEnv\Install.ps1 -Password <Password>
 ```
 
+## Prerequisite
+If you have forked this project, this project will attempt to push to a shared container registery. Please follow the [instructions](https://github.com/msft-davidlee/az-internal-shared-services) to create the shared services environment. Note that this step is necessary if you are planning to create the [contoso customer service app service](https://github.com/msft-davidlee/contoso-customer-service-app-service) in your Subscription.
+
 # DevOps Pipeline
 There is a azure-pipelines.yml file which you can use if you want to demo a connection from GitHub Repository to Azure Pipeline. As such, you are not using Azure Repo, but GitHub to store your code which gives you an advantage of having the ability to do code scanning using GitHub CodeQL.
 

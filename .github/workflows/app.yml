@@ -1,28 +1,10 @@
 on: push
 
 jobs:
-  setup:
-    name: Choose Secrets Environment Job
-    runs-on: windows-latest
-    steps:
-      - id: setup
-        name: Setup Environment Setp
-        run: |
-            if ('${{ github.ref }}' -eq 'refs/heads/main') { 
-              echo "::set-output name=build_env::prod"
-            } else {
-              echo "::set-output name=build_env::dev"
-            }
-    outputs:
-      build_env: ${{ steps.setup.outputs.build_env }}
-
   build_deploy:
     name: Build and Deploy
     needs: setup
-    environment: ${{ needs.setup.outputs.build_env }}
-    runs-on: windows-latest
-    env:
-      RESOURCE_GROUP_NAME: ${{ secrets.RESOURCE_GROUP }}-${{ needs.setup.outputs.build_env }}    
+    runs-on: windows-latest  
     steps:
       - uses: actions/checkout@v2
 
@@ -54,14 +36,6 @@ jobs:
           creds: ${{ secrets.MS_AZURE_CREDENTIALS }}
           enable-AzPSSession: true
 
-      - name: Build azure environment
-        id: deploy
-        uses: azure/arm-deploy@v1
-        with:
-          resourceGroupName: ${{ env.RESOURCE_GROUP_NAME }}
-          template: ./deployment/deploy.bicep
-          parameters: containerName=apps prefix=${{ secrets.PREFIX }} appEnvironment=${{ needs.setup.outputs.build_env }} branch=${{ github.ref }}
-
       - id: buid-and-deploy
         name: Build apps and container images
-        run: .\Deployment\Build.ps1 -AcrName ${{ steps.deploy.outputs.acrName }} -AccountName ${{ steps.deploy.outputs.strName }} -ContainerName apps -ResourceGroup ${{ env.RESOURCE_GROUP_NAME }}
+        run: .\Deployment\Build.ps1
