@@ -3,7 +3,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$platformRes = (az resource list --tag stack-name=platform --tag stack-environment=prod | ConvertFrom-Json)
+$platformRes = (az resource list --tag stack-name=platform | ConvertFrom-Json)
 if (!$platformRes) {
     throw "Unable to find eligible platform resources!"
 }
@@ -11,13 +11,13 @@ if ($platformRes.Length -eq 0) {
     throw "Unable to find 'ANY' eligible platform resources!"
 }
 
-$acr = ($platformRes | Where-Object { $_.type -eq "Microsoft.ContainerRegistry/registries" })
+$acr = ($platformRes | Where-Object { $_.type -eq "Microsoft.ContainerRegistry/registries" -and $_.tags.'stack-environment' -eq 'prod' })
 if (!$acr) {
     throw "Unable to find eligible platform container registry!"
 }
 $AcrName = $acr.Name
 
-$str = ($platformRes | Where-Object { $_.type -eq "Microsoft.Storage/storageAccounts" })
+$str = ($platformRes | Where-Object { $_.type -eq "Microsoft.Storage/storageAccounts" -and $_.tags.'stack-environment' -eq 'prod' })
 if (!$str) {
     throw "Unable to find eligible storage account!"
 }
@@ -43,8 +43,6 @@ $list = az acr repository list --name $AcrName | ConvertFrom-Json
 if ($LastExitCode -ne 0) {
     throw "An error has occured. Unable to list from repository"
 }
-
-# Build your app with ACR build command
 
 $namePrefix = "contoso-demo"
 $apps = @(
@@ -91,6 +89,7 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
     }    
 
     if (!$list -or !$list.Contains($imageName)) {
+        # Build your app with ACR build command
         az acr build --image $imageName -r $AcrName --file ./$path/Dockerfile .
     
         if ($LastExitCode -ne 0) {
@@ -108,6 +107,7 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
     }
     
     dotnet publish -c Release -o out
+
     Compress-Archive out\* -DestinationPath $appFileName -Force
 
     # Seem like question mark is causing appfilename to be removed
@@ -120,3 +120,14 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
 
     Pop-Location
 }
+
+Push-Location Db
+if ($BUILD_ENV -eq 'dev') {
+    $dbFileName = "Migrations-dev.sql"
+}
+else {
+    $dbFileName = "Migrations.sql"
+}
+$url = "https://$AccountName.blob.core.windows.net/$ContainerName/" + $dbFileName + "?$sas"    
+azcopy_v10 copy $dbFileName $url --overwrite=false
+Pop-Location
