@@ -129,5 +129,5 @@ else {
     $dbFileName = "Migrations.sql"
 }
 $url = "https://$AccountName.blob.core.windows.net/$ContainerName/" + $dbFileName + "?$sas"    
-azcopy_v10 copy $dbFileName $url --overwrite=false
+azcopy_v10 copy "Migrations.sql" $url --overwrite=false
 Pop-Location
