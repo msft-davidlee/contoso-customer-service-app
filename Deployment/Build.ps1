@@ -1,9 +1,31 @@
-param([string]$AcrName, [string]$AccountName, [string]$ContainerName, [string]$ResourceGroup)
+param(
+    [string]$BUILD_ENV)
 
 $ErrorActionPreference = "Stop"
 
+$platformRes = (az resource list --tag stack-name=platform --tag stack-environment=prod | ConvertFrom-Json)
+if (!$platformRes) {
+    throw "Unable to find eligible platform resources!"
+}
+if ($platformRes.Length -eq 0) {
+    throw "Unable to find 'ANY' eligible platform resources!"
+}
+
+$acr = ($platformRes | Where-Object { $_.type -eq "Microsoft.ContainerRegistry/registries" })
+if (!$acr) {
+    throw "Unable to find eligible platform container registry!"
+}
+$AcrName = $acr.Name
+
+$str = ($platformRes | Where-Object { $_.type -eq "Microsoft.Storage/storageAccounts" })
+if (!$str) {
+    throw "Unable to find eligible storage account!"
+}
+$AccountName = $str.Name
+$ContainerName = "apps"
+
 # Generate SAS upfront
-$AccountKey = (az storage account keys list -g $ResourceGroup -n $AccountName | ConvertFrom-Json)[0].value
+$AccountKey = (az storage account keys list -g $str.ResourceGroup -n $AccountName | ConvertFrom-Json)[0].value
 $end = (Get-Date).AddDays(1).ToString("yyyy-MM-dd")
 $start = (Get-Date).ToString("yyyy-MM-dd")
 $sas = (az storage container generate-sas -n $ContainerName --account-name $AccountName --account-key $AccountKey --permissions racwl --expiry $end --start $start --https-only | ConvertFrom-Json)
@@ -63,6 +85,11 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
     }
 
     $imageName = "$appName`:$appVersion"
+
+    if ($BUILD_ENV -eq 'dev') {
+        $imageName = "$imageName-$BUILD_ENV"
+    }    
+
     if (!$list -or !$list.Contains($imageName)) {
         az acr build --image $imageName -r $AcrName --file ./$path/Dockerfile .
     
@@ -73,7 +100,13 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
 
     Push-Location $path
 
-    $appFileName = ("$appName-$appVersion" + ".zip")
+    if ($BUILD_ENV -eq 'dev') {
+        $appFileName = ("$appName-$appVersion-dev" + ".zip")
+    }
+    else {
+        $appFileName = ("$appName-$appVersion" + ".zip")
+    }
+    
     dotnet publish -c Release -o out
     Compress-Archive out\* -DestinationPath $appFileName -Force
 
