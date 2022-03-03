@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
 using System;
+using DemoCore;
 
 namespace DemoWebsite
 {
@@ -31,7 +32,7 @@ namespace DemoWebsite
             return string.Equals(Environment.GetEnvironmentVariable("ASPNETCORE_FORWARDEDHEADERS_ENABLED"), "true", StringComparison.OrdinalIgnoreCase);
         }
 
-        private const string VersionFileName = "version.txt";
+        private const string VersionFileName = "version.txt";        
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -84,13 +85,7 @@ namespace DemoWebsite
 
             services.AddDbContext<AppDbContext>(options =>
             {
-                string connectionString = Configuration["DbConnectionString"];
-                if (connectionString.StartsWith("FilePath="))
-                {
-                    string filePath = connectionString.Split('=')[1];
-                    connectionString = File.ReadAllText(filePath);
-                }
-                options.UseSqlServer(connectionString,
+                options.UseSqlServer(Configuration.GetConnectionString(),
                     sqlServerOptionsAction: sqlOptions =>
                     {
                         sqlOptions.EnableRetryOnFailure();

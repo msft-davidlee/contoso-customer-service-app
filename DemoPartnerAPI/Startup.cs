@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
-using System.IO;
+using DemoCore;
 
 namespace DemoPartnerAPI
 {
@@ -19,20 +19,14 @@ namespace DemoPartnerAPI
         }
 
         public IConfiguration Configuration { get; }
-
+        
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddLogging();
             services.AddDbContext<AppDbContext>(options =>
             {
-                string connectionString = Configuration["DbConnectionString"];
-                if (connectionString.StartsWith("FilePath="))
-                {
-                    string filePath = connectionString.Split('=')[1];
-                    connectionString = File.ReadAllText(filePath);
-                }
-                options.UseSqlServer(connectionString,
+                options.UseSqlServer(Configuration.GetConnectionString(),
                     sqlServerOptionsAction: sqlOptions =>
                     {
                         sqlOptions.EnableRetryOnFailure();

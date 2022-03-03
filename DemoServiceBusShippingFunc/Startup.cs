@@ -1,4 +1,5 @@
-﻿using DemoPartnerCore;
+﻿using DemoCore;
+using DemoPartnerCore;
 using DemoPartnerCore.Models;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +14,9 @@ namespace DemoServiceBusShippingFunc
     {
         public override void Configure(IFunctionsHostBuilder builder)
         {
-            string value = Environment.GetEnvironmentVariable("Connection");
+            var configuration = builder.GetContext().Configuration;
+
+            string value = configuration["Connection"];
             if (value.StartsWith("FilePath="))
             {
                 string filePath = value.Split('=')[1];
@@ -23,13 +26,7 @@ namespace DemoServiceBusShippingFunc
 
             builder.Services.AddDbContext<AppDbContext>(options =>
             {
-                string connectionString = Environment.GetEnvironmentVariable("DbConnectionString");
-                if (connectionString.StartsWith("FilePath="))
-                {
-                    string filePath = connectionString.Split('=')[1];
-                    connectionString = File.ReadAllText(filePath);
-                }
-                options.UseSqlServer(connectionString,
+                options.UseSqlServer(configuration.GetConnectionString(),
                     sqlServerOptionsAction: sqlOptions =>
                     {
                         sqlOptions.EnableRetryOnFailure();

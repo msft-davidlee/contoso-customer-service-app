@@ -33,7 +33,7 @@ A more concrete overview of the SLA uptime of how long the solution can be down 
 # Demo
 The Customer Service App can be hosted on many different platforms, which includes directly on a VM (VMSS), Container (AKS), and App Service. As such, this project by itself is not typically used independently. 
 
-The technology stack used includes .NET Core 3.1, MS SSQL, Azure Storage Queue, Azure Service Bus, and Azure Functions. Most services can be run and debugged locally via emulators except for Azure Service Bus.
+The technology stack used includes .NET 6, MS SSQL, Azure Storage Queue, Azure Service Bus, and Azure Functions. Most services can be run and debugged locally via emulators except for Azure Service Bus.
 
 ## Use this Project to showcase solutions
 1. This solution employs a microservice architecture where we have the API and legacy API service in relation to the Member Id question. It may not make sense for the business to include the old Member Id as part of the new system as it will be retired in 3 years. As such, we are keeping the legacy API. Here, it may make sense to think about leveraging APIM so we have a consistent API experience for our microservice.
