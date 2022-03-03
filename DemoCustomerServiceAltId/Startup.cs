@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.IO;
+using DemoCore;
 
 namespace DemoCustomerServiceAltId
 {
@@ -25,13 +25,7 @@ namespace DemoCustomerServiceAltId
             services.AddLogging();
             services.AddDbContext<AppDbContext>(options =>
             {
-                string connectionString = Configuration["DbConnectionString"];
-                if (connectionString.StartsWith("FilePath="))
-                {
-                    string filePath = connectionString.Split('=')[1];
-                    connectionString = File.ReadAllText(filePath);
-                }
-                options.UseSqlServer(connectionString,
+                options.UseSqlServer(Configuration.GetConnectionString(),
                     sqlServerOptionsAction: sqlOptions =>
                     {
                         sqlOptions.EnableRetryOnFailure();
