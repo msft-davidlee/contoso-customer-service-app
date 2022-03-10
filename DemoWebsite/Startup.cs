@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
 using System;
 using DemoCore;
+using System.Threading.Tasks;
 
 namespace DemoWebsite
 {
@@ -32,7 +33,7 @@ namespace DemoWebsite
             return string.Equals(Environment.GetEnvironmentVariable("ASPNETCORE_FORWARDEDHEADERS_ENABLED"), "true", StringComparison.OrdinalIgnoreCase);
         }
 
-        private const string VersionFileName = "version.txt";        
+        private const string VersionFileName = "version.txt";
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -72,6 +73,24 @@ namespace DemoWebsite
                         .AddMicrosoftIdentityWebApp(Configuration.GetSection("AzureAd"))
                         .EnableTokenAcquisitionToCallDownstreamApi()
                         .AddInMemoryTokenCaches();
+                }
+
+                var overrideHostname = Configuration["OverrideAuthRedirectHostName"];
+                if (!string.IsNullOrEmpty(overrideHostname))
+                {
+                    services.Configure<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme, options =>
+                    {
+                        options.SaveTokens = true; // this saves the token for the downstream api
+                        options.Events = new OpenIdConnectEvents
+                        {
+                            OnRedirectToIdentityProvider = async ctxt =>
+                            {
+
+                                ctxt.ProtocolMessage.RedirectUri = overrideHostname;
+                                await Task.Yield();
+                            }
+                        };
+                    });
                 }
 
                 services.AddControllersWithViews(options =>
