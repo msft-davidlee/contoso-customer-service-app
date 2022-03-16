@@ -28,8 +28,6 @@ namespace DemoWebsite.Core
             {
                 var uri = $"{alternateIdServiceUri}/AlternateId/{alternateId}";
 
-                var token = await _tokenAcquisition.GetAccessTokenForUserAsync(new[] { "customerservice-rewards-api" });
-
                 var response = await _client.GetAsync(new Uri(uri));
                 response.EnsureSuccessStatusCode();
 
