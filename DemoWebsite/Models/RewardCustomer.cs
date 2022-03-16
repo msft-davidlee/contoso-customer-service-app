@@ -1,16 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Text.Json.Serialization;
 
 namespace DemoWebsite.Models
 {
     public class RewardCustomer
     {
-        [Key]
+        [JsonPropertyName("memberId")]
         public string MemberId { get; set; }
 
+        [JsonPropertyName("firstName")]
         public string FirstName { get; set; }
 
+        [JsonPropertyName("lastName")]
         public string LastName { get; set; }
-
-        public int Points { get; set; }
     }
 }

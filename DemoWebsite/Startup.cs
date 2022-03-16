@@ -61,19 +61,19 @@ namespace DemoWebsite
 
             if (IsAuth())
             {
-                if (ConfigureForB2C())
-                {
-                    services.AddMicrosoftIdentityWebAppAuthentication(Configuration, "AzureAd")
-                        .EnableTokenAcquisitionToCallDownstreamApi()
-                        .AddInMemoryTokenCaches();
-                }
-                else
-                {
-                    services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-                        .AddMicrosoftIdentityWebApp(Configuration.GetSection("AzureAd"))
-                        .EnableTokenAcquisitionToCallDownstreamApi()
-                        .AddInMemoryTokenCaches();
-                }
+                //if (ConfigureForB2C())
+                //{
+                services.AddMicrosoftIdentityWebAppAuthentication(Configuration, "AzureAd")
+                    .EnableTokenAcquisitionToCallDownstreamApi()
+                    .AddInMemoryTokenCaches();
+                //}
+                //else
+                //{
+                //    services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+                //        .AddMicrosoftIdentityWebApp(Configuration.GetSection("AzureAd"))
+                //        .EnableTokenAcquisitionToCallDownstreamApi()
+                //        .AddInMemoryTokenCaches();
+                //}
 
                 var overrideHostname = Configuration["OverrideAuthRedirectHostName"];
                 if (!string.IsNullOrEmpty(overrideHostname))
@@ -111,17 +111,21 @@ namespace DemoWebsite
                     });
             });
             services.AddTransient<IDbServiceFactory, DbServiceFactory>();
-            services.AddTransient<IRewardCustomerService, RewardCustomerService>();
             services.AddTransient<IRewardItemService, RewardItemService>();
             services.AddTransient<IRewardService, RewardService>();
             services.AddTransient<IProductService, ProductService>();
             services.AddTransient<IOrderService, HttpOrderService>();
             services.AddTransient<IAlternateIdService, HttpAlternateIdService>();
+            services.AddTransient<IRewardCustomerPointsService, RewardCustomerPointsService>();
+
+            // https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#how-to-use-typed-clients-with-ihttpclientfactory
+            services.AddHttpClient<IMemberService, MemberService>();
 
             services.AddHealthChecks()
-                .AddCheck<RewardCustomerService>("Database")
+                .AddCheck<IRewardCustomerPointsService>("Database")
                 .AddCheck<HttpAlternateIdService>("AlternateIdService")
-                .AddCheck<ProductService>("ProductService");
+                .AddCheck<ProductService>("ProductService")
+                .AddCheck<MemberService>("MemberService");
 
             var svc = services.AddRazorPages();
 

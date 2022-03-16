@@ -51,6 +51,10 @@ $apps = @(
         path = "DemoWebsite";
     },
     @{
+        name = "$namePrefix-member-service";
+        path = "DemoCustomerServiceMember";
+    },
+    @{
         name = "$namePrefix-alternate-id-service";
         path = "DemoCustomerServiceAltId";
     },
@@ -68,19 +72,13 @@ $apps = @(
     }
 )
 
-$version = "v1"
+$version = "v4.0"
 for ($i = 0; $i -lt $apps.Length; $i++) {
     $app = $apps[$i]
 
     $appName = $app.name
     $path = $app.path
-
-    if (Test-Path ./$path/version.txt) {
-        $appVersion = Get-Content ./$path/version.txt
-    }
-    else {
-        $appVersion = $version
-    }
+    $appVersion = $version
 
     $imageName = "$appName`:$appVersion"
 
@@ -123,10 +121,10 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
 
 Push-Location Db
 if ($BUILD_ENV -eq 'dev') {
-    $dbFileName = "Migrations-dev.sql"
+    $dbFileName = "Migrations-$version-dev.sql"
 }
 else {
-    $dbFileName = "Migrations.sql"
+    $dbFileName = "Migrations-$version.sql"
 }
 $url = "https://$AccountName.blob.core.windows.net/$ContainerName/" + $dbFileName + "?$sas"    
 azcopy_v10 copy "Migrations.sql" $url --overwrite=false

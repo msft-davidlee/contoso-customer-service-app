@@ -9,7 +9,7 @@ namespace DemoWebsite.Models
 
         }
 
-        public DbSet<RewardCustomer> RewardCustomers { get; set; }
+        public DbSet<RewardCustomerPoints> RewardCustomerPoints { get; set; }
         public DbSet<RewardItem> RewardItems { get; set; }
     }
 }

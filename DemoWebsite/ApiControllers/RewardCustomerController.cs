@@ -10,14 +10,16 @@ namespace DemoWebsite.ApiControllers
     [Route("api/[controller]")]
     [ApiController]
     public class RewardCustomerController : ControllerBase
-    {
-        private readonly IRewardCustomerService _rewardCustomerService;
+    {        
         private readonly IAlternateIdService _alternateIdService;
+        private readonly IMemberService _memberService;
 
-        public RewardCustomerController(IRewardCustomerService rewardCustomerService, IAlternateIdService alternateIdService)
-        {
-            _rewardCustomerService = rewardCustomerService;
+        public RewardCustomerController(            
+            IAlternateIdService alternateIdService,
+            IMemberService tokenAcquisition)
+        {            
             _alternateIdService = alternateIdService;
+            _memberService = tokenAcquisition;
         }
 
         public async Task<List<RewardCustomer>> GetRewardCustomers(string memberId, string firstName, string lastName, bool? useAlternateId)
@@ -29,15 +31,15 @@ namespace DemoWebsite.ApiControllers
                     memberId = await _alternateIdService.GetMemberIdAsync(memberId);
                 }
 
-                return new List<RewardCustomer> { await _rewardCustomerService.GetRewardCustomer(memberId) };
+                return new List<RewardCustomer> { await _memberService.GetRewardCustomer(memberId) };
             }
 
             if (!string.IsNullOrEmpty(firstName) && !string.IsNullOrEmpty(lastName))
             {
-                return (await _rewardCustomerService.GetRewardCustomers(firstName, lastName)).ToList();
+                return (await _memberService.GetRewardCustomers(firstName, lastName)).ToList();
             }
 
-            return (await _rewardCustomerService.GetRewardCustomers()).ToList();
+            return (await _memberService.GetRewardCustomers()).ToList();
         }
     }
 }

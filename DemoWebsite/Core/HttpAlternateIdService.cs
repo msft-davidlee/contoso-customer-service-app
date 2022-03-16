@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Identity.Web;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Net.Http;
@@ -11,11 +12,13 @@ namespace DemoWebsite.Core
     public class HttpAlternateIdService : IAlternateIdService, IHealthCheck
     {
         private readonly IConfiguration _configuration;
+        private readonly ITokenAcquisition _tokenAcquisition;
         private static readonly HttpClient _client = new HttpClient();
 
-        public HttpAlternateIdService(IConfiguration configuration)
+        public HttpAlternateIdService(IConfiguration configuration, ITokenAcquisition tokenAcquisition)
         {
             _configuration = configuration;
+            _tokenAcquisition = tokenAcquisition;
         }
 
         public async Task<string> GetMemberIdAsync(string alternateId)
@@ -24,6 +27,9 @@ namespace DemoWebsite.Core
             if (!string.IsNullOrEmpty(alternateIdServiceUri))
             {
                 var uri = $"{alternateIdServiceUri}/AlternateId/{alternateId}";
+
+                var token = await _tokenAcquisition.GetAccessTokenForUserAsync(new[] { "customerservice-rewards-api" });
+
                 var response = await _client.GetAsync(new Uri(uri));
                 response.EnsureSuccessStatusCode();
 
