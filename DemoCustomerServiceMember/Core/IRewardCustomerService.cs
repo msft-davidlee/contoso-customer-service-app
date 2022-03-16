@@ -1,8 +1,6 @@
-﻿using DemoWebsite.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using DemoCustomerServiceMember.Models;
 
-namespace DemoWebsite.Core
+namespace DemoCustomerServiceMember.Core
 {
     public interface IRewardCustomerService
     {

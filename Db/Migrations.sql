@@ -1,22 +1,41 @@
 USE [app]
 
 IF NOT EXISTS (SELECT 1 from sysobjects where name='RewardCustomers' and xtype='U')
-	CREATE TABLE RewardCustomers ([MemberId] VARCHAR(10) NOT NULL, FirstName VARCHAR(25), LastName VARCHAR(25), [Points] INT, PRIMARY KEY (MemberId))
+	CREATE TABLE RewardCustomers ([MemberId] VARCHAR(10) NOT NULL, FirstName VARCHAR(25), LastName VARCHAR(25), PRIMARY KEY (MemberId))
 GO
 
 IF ((SELECT COUNT(1) FROM RewardCustomers) = 0)
 BEGIN
-    INSERT INTO RewardCustomers(MemberId,FirstName,LastName, Points) VALUES('1320122100', 'David', 'Lee', FLOOR(RAND()*(1300-5+1)+5))
-    INSERT INTO RewardCustomers(MemberId,FirstName,LastName, Points) VALUES('7611334511','John', 'West', FLOOR(RAND()*(300-0+1)+0))
-    INSERT INTO RewardCustomers(MemberId,FirstName,LastName, Points) VALUES('8549494944','Mary', 'Lynn', FLOOR(RAND()*(300-0+1)+0))
-    INSERT INTO RewardCustomers(MemberId,FirstName,LastName, Points) VALUES('5454667577','Will', 'Smith', FLOOR(RAND()*(1300-0+1)+0))
-    INSERT INTO RewardCustomers(MemberId,FirstName,LastName, Points) VALUES('6523454446','Henry', 'Jackson', FLOOR(RAND()*(300-0+1)+0))
-    INSERT INTO RewardCustomers(MemberId,FirstName,LastName, Points) VALUES('4335353354','Susan', 'Pang', FLOOR(RAND()*(300-0+1)+0))
-    INSERT INTO RewardCustomers(MemberId,FirstName,LastName, Points) VALUES('5657677755','Moe', 'Williamson', FLOOR(RAND()*(300-20+1)+20))
-    INSERT INTO RewardCustomers(MemberId,FirstName,LastName, Points) VALUES('4648889113','Jack', 'Williamson', FLOOR(RAND()*(300-20+1)+20))
-    INSERT INTO RewardCustomers(MemberId,FirstName,LastName, Points) VALUES('5484873335','Hami', 'Young', FLOOR(RAND()*(2000-100+1)+100))
-    INSERT INTO RewardCustomers(MemberId,FirstName,LastName, Points) VALUES('6543554443','Linda', 'Peters', FLOOR(RAND()*(300-0+1)+0))
-    INSERT INTO RewardCustomers(MemberId,FirstName,LastName, Points) VALUES('5325553353','Frank', 'Chang', FLOOR(RAND()*(300-10+1)+10))
+    INSERT INTO RewardCustomers(MemberId,FirstName,LastName) VALUES('1320122100', 'David', 'Lee')
+    INSERT INTO RewardCustomers(MemberId,FirstName,LastName) VALUES('7611334511','John', 'West')
+    INSERT INTO RewardCustomers(MemberId,FirstName,LastName) VALUES('8549494944','Mary', 'Lynn')
+    INSERT INTO RewardCustomers(MemberId,FirstName,LastName) VALUES('5454667577','Will', 'Smith')
+    INSERT INTO RewardCustomers(MemberId,FirstName,LastName) VALUES('6523454446','Henry', 'Jackson')
+    INSERT INTO RewardCustomers(MemberId,FirstName,LastName) VALUES('4335353354','Susan', 'Pang')
+    INSERT INTO RewardCustomers(MemberId,FirstName,LastName) VALUES('5657677755','Moe', 'Williamson')
+    INSERT INTO RewardCustomers(MemberId,FirstName,LastName) VALUES('4648889113','Jack', 'Williamson')
+    INSERT INTO RewardCustomers(MemberId,FirstName,LastName) VALUES('5484873335','Hami', 'Young')
+    INSERT INTO RewardCustomers(MemberId,FirstName,LastName) VALUES('6543554443','Linda', 'Peters')
+    INSERT INTO RewardCustomers(MemberId,FirstName,LastName) VALUES('5325553353','Frank', 'Chang')
+END
+
+IF NOT EXISTS (SELECT 1 from sysobjects where name='RewardCustomerPoints' and xtype='U')
+	CREATE TABLE RewardCustomerPoints ([MemberId] VARCHAR(10) NOT NULL, [Points] INT, PRIMARY KEY (MemberId))
+GO
+
+IF ((SELECT COUNT(1) FROM RewardCustomerPoints) = 0)
+BEGIN
+    INSERT INTO RewardCustomerPoints(MemberId, Points) VALUES('1320122100', FLOOR(RAND()*(1300-5+1)+5))
+    INSERT INTO RewardCustomerPoints(MemberId, Points) VALUES('7611334511', FLOOR(RAND()*(300-0+1)+0))
+    INSERT INTO RewardCustomerPoints(MemberId, Points) VALUES('8549494944', FLOOR(RAND()*(300-0+1)+0))
+    INSERT INTO RewardCustomerPoints(MemberId, Points) VALUES('5454667577', FLOOR(RAND()*(1300-0+1)+0))
+    INSERT INTO RewardCustomerPoints(MemberId, Points) VALUES('6523454446', FLOOR(RAND()*(300-0+1)+0))
+    INSERT INTO RewardCustomerPoints(MemberId, Points) VALUES('4335353354', FLOOR(RAND()*(300-0+1)+0))
+    INSERT INTO RewardCustomerPoints(MemberId, Points) VALUES('5657677755', FLOOR(RAND()*(300-20+1)+20))
+    INSERT INTO RewardCustomerPoints(MemberId, Points) VALUES('4648889113', FLOOR(RAND()*(300-20+1)+20))
+    INSERT INTO RewardCustomerPoints(MemberId, Points) VALUES('5484873335', FLOOR(RAND()*(2000-100+1)+100))
+    INSERT INTO RewardCustomerPoints(MemberId, Points) VALUES('6543554443', FLOOR(RAND()*(300-0+1)+0))
+    INSERT INTO RewardCustomerPoints(MemberId, Points) VALUES('5325553353', FLOOR(RAND()*(300-10+1)+10))
 END
 
 IF NOT EXISTS (SELECT 1 from sysobjects where name='RewardItems' and xtype='U')

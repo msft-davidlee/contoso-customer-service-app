@@ -4,18 +4,21 @@ namespace DemoWebsite.Core
 {
     public class RewardService : IRewardService
     {
-        private readonly IRewardCustomerService _rewardCustomerService;
+        private readonly IRewardCustomerPointsService _rewardCustomerPointsService;
+        private readonly IMemberService _memberService;
         private readonly IRewardItemService _rewardItemService;
         private readonly IProductService _productService;
         private readonly IOrderService _orderService;
 
         public RewardService(
-            IRewardCustomerService rewardCustomerService,
+            IRewardCustomerPointsService rewardCustomerPointsService,
+            IMemberService memberService,
             IRewardItemService rewardItemService,
             IProductService productService,
             IOrderService orderService)
         {
-            _rewardCustomerService = rewardCustomerService;
+            _rewardCustomerPointsService = rewardCustomerPointsService;
+            _memberService = memberService;
             _rewardItemService = rewardItemService;
             _productService = productService;
             _orderService = orderService;
@@ -26,13 +29,14 @@ namespace DemoWebsite.Core
             var result = new RewardResult();
             if (!string.IsNullOrEmpty(memberId))
             {
-                var customer = await _rewardCustomerService.GetRewardCustomer(memberId);
+                var customer = await _memberService.GetRewardCustomer(memberId);
                 if (customer != null)
                 {
+                    var customerPoints = await _rewardCustomerPointsService.GetPoints(memberId);
                     var reward = await _rewardItemService.GetRewardItem(rewardItemId);
                     if (reward != null)
                     {
-                        if (reward.Points > customer.Points)
+                        if (reward.Points > customerPoints)
                         {
                             result.Message = "Member does not have enough points for this reward item.";
                         }
@@ -46,9 +50,9 @@ namespace DemoWebsite.Core
                                 if (order.Success)
                                 {
                                     // Redeem
-                                    customer.Points -= reward.Points;
-                                    await _rewardCustomerService.UpdateRewardCustomer();
-                                    result.Message = $"Member has {customer.Points} points remaining. Order Id = {order.OrderId.Value}. Estimated Time = {order.EstimatedSeconds} seconds.";
+                                    customerPoints -= reward.Points;
+                                    await _rewardCustomerPointsService.Update(memberId, customerPoints);
+                                    result.Message = $"Member has {customerPoints} points remaining. Order Id = {order.OrderId.Value}. Estimated Time = {order.EstimatedSeconds} seconds.";
                                     result.Success = true;
                                 }
                                 else

@@ -1,59 +1,36 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Identity.Web;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace DemoWebsite.Core
 {
-    public class HttpAlternateIdService : IAlternateIdService, IHealthCheck
+    public class HttpAlternateIdService : MicroserviceBase, IAlternateIdService, IHealthCheck
     {
-        private readonly IConfiguration _configuration;
-        private static readonly HttpClient _client = new HttpClient();
-
-        public HttpAlternateIdService(IConfiguration configuration)
+        public HttpAlternateIdService(IConfiguration configuration, HttpClient httpClient, ITokenAcquisition tokenAcquisition)
+            : base(tokenAcquisition, configuration, httpClient)
         {
-            _configuration = configuration;
+
+        }
+
+        protected override string GetUriConfigName()
+        {
+            return "AlternateIdServiceUri";
         }
 
         public async Task<string> GetMemberIdAsync(string alternateId)
         {
-            var alternateIdServiceUri = _configuration["AlternateIdServiceUri"];
-            if (!string.IsNullOrEmpty(alternateIdServiceUri))
-            {
-                var uri = $"{alternateIdServiceUri}/AlternateId/{alternateId}";
-                var response = await _client.GetAsync(new Uri(uri));
-                response.EnsureSuccessStatusCode();
+            var uri = $"{GetBaseUri()}AlternateId/{alternateId}";
 
-                var o = JObject.Parse(await response.Content.ReadAsStringAsync());
+            var response = await (await GetHttpClient()).GetAsync(new Uri(uri));
+            response.EnsureSuccessStatusCode();
 
-                return o["memberId"].ToString();
-            }
+            var o = JObject.Parse(await response.Content.ReadAsStringAsync());
 
-            throw new ApplicationException("AlternateIdServiceUri is not configured.");
-        }
-
-        public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
-        {
-            var alternateIdServiceUri = _configuration["AlternateIdServiceUri"];
-            if (string.IsNullOrEmpty(alternateIdServiceUri))
-                throw new ApplicationException("AlternateIdServiceUri is not configured.");
-
-            var uri = $"{alternateIdServiceUri}/health";
-
-            try
-            {
-                var response = await _client.GetAsync(new Uri(uri));
-                response.EnsureSuccessStatusCode();
-
-                return HealthCheckResult.Healthy();
-            }
-            catch
-            {
-                return HealthCheckResult.Unhealthy();
-            }
+            return o["memberId"].ToString();
         }
     }
 }
