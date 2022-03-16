@@ -72,7 +72,7 @@ $apps = @(
     }
 )
 
-$version = "v4.1"
+$version = "v4.2"
 for ($i = 0; $i -lt $apps.Length; $i++) {
     $app = $apps[$i]
 

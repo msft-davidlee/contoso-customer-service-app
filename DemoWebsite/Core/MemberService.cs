@@ -21,7 +21,7 @@ namespace DemoWebsite.Core
             ILogger<MemberService> logger) : base(tokenAcquisition, configuration, httpClient)
         {
             _logger = logger;
-            _memberUri = GetBaseUri() + "Members";
+            _memberUri = $"{GetBaseUri()}Members";
         }
 
         private async Task<List<RewardCustomer>> InvokeGetRequest(string uri)
@@ -38,7 +38,7 @@ namespace DemoWebsite.Core
             {
                 if (!string.IsNullOrEmpty(body))
                 {
-                    _logger.LogTrace(body);
+                    _logger.LogError($"An unknown error has occured: {body}");
                 }
 
                 throw;

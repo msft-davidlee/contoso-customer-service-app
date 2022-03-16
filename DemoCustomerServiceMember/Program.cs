@@ -15,7 +15,7 @@ builder.Services.AddTransient<IDbServiceFactory, DbServiceFactory>();
 builder.Services.AddTransient<IRewardCustomerService, RewardCustomerService>();
 
 builder.Services.AddHealthChecks()
-    .AddCheck<RewardCustomerService>("MemberService");
+    .AddCheck<RewardCustomerService>("Database");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
@@ -32,7 +32,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>
 {
-    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo API", Version = "v1" });
+    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Member Service API", Version = "v1" });
     option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -60,12 +60,8 @@ builder.Services.AddSwaggerGen(option =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
@@ -74,7 +70,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
+//app.MapControllers();
 
 app.UseEndpoints(endpoints =>
 {
