@@ -47,8 +47,16 @@ If you are interested to run this Solution locally as a Developer, you will need
 .\LocalEnv\Install.ps1 -Password <Password>
 ```
 
-## Prerequisite
-If you have forked this project, this project will attempt to push to a shared container registery. Please follow the [instructions](https://github.com/msft-davidlee/az-internal-shared-services) to create the shared services environment. Note that this step is necessary if you are planning to create the [contoso customer service app service](https://github.com/msft-davidlee/contoso-customer-service-app-service) in your Subscription.
+# Get Started
+To deploy artifcats in your Azure subscription (Azure Storage for zip deployments into App Services and Images into Azure Container Registry), please follow the steps below.
+1. Fork this git repo. See: https://docs.github.com/en/get-started/quickstart/fork-a-repo
+2. Follow the steps in https://github.com/msft-davidlee/contoso-governance to create the necessary resources via Azure Blueprint.
+3. Create the following secret(s) in your github per environment. Be sure to populate with your desired values. The values below are all suggestions
+
+## Secrets
+| Name | Value |
+| --- | --- |
+| MS_AZURE_CREDENTIALS | <pre>{<br/>&nbsp;&nbsp;&nbsp;&nbsp;"clientId": "",<br/>&nbsp;&nbsp;&nbsp;&nbsp;"clientSecret": "", <br/>&nbsp;&nbsp;&nbsp;&nbsp;"subscriptionId": "",<br/>&nbsp;&nbsp;&nbsp;&nbsp;"tenantId": "" <br/>}</pre> |
 
 # DevOps Pipeline
 There is a azure-pipelines.yml file which you can use if you want to demo a connection from GitHub Repository to Azure Pipeline. As such, you are not using Azure Repo, but GitHub to store your code which gives you an advantage of having the ability to do code scanning using GitHub CodeQL.
