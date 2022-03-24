@@ -11,10 +11,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 
+builder.Services.AddHttpClient<IAlternateMemberIdService, AlternateMemberIdService>();
+
 builder.Services.AddTransient<IDbServiceFactory, DbServiceFactory>();
 builder.Services.AddTransient<IRewardCustomerService, RewardCustomerService>();
 
 builder.Services.AddHealthChecks()
+    .AddCheck<AlternateMemberIdService>("AlternateMemberIdService")
     .AddCheck<RewardCustomerService>("Database");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
