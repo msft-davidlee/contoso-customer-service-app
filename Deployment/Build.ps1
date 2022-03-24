@@ -52,6 +52,7 @@ if ($LastExitCode -ne 0) {
     throw "An error has occured. Unable to list from repository"
 }
 
+# Do not change this as this affect container reg
 $namePrefix = "contoso-demo"
 $apps = @(
     @{
