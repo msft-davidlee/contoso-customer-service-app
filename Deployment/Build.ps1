@@ -60,6 +60,10 @@ $apps = @(
         path = "DemoWebsite";
     },
     @{
+        name = "$namePrefix-member-points-service";
+        path = "DemoCustomerServicePoints";
+    },    
+    @{
         name = "$namePrefix-member-service";
         path = "DemoCustomerServiceMember";
     },
