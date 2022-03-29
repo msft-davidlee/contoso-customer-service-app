@@ -9,6 +9,7 @@ namespace DemoPartnerCore
     public interface IProductService
     {
         Task<Product> GetProduct(string productId);
+        Task<int> AddQuantity(string productId, int quantity);
     }
 
     public class ProductService : IProductService, IHealthCheck
@@ -35,6 +36,19 @@ namespace DemoPartnerCore
         public async Task<Product> GetProduct(string productId)
         {
             return await _dbService.GetDbContext().Products.SingleOrDefaultAsync(x => x.Id == productId);
+        }
+
+        public async Task<int> AddQuantity(string productId, int quantity)
+        {
+            var product = await GetProduct(productId);
+            product.Quantity += quantity;
+
+            var newQty = product.Quantity;
+
+            _dbService.GetDbContext().Products.Update(product);
+            await _dbService.GetDbContext().SaveChangesAsync();
+
+            return newQty;
         }
     }
 }

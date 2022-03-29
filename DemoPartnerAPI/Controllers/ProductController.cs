@@ -21,5 +21,23 @@ namespace DemoPartnerAPI.Controllers
         {
             return await _productService.GetProduct(productId);
         }
+
+        [HttpPost]
+        public async Task<ProductUpdateResponseModel> Post(ProductUpdateModel product)
+        {
+            var qty = await _productService.AddQuantity(product.ProductId, product.Quantity);
+            return new ProductUpdateResponseModel { Total = qty };
+        }
+    }
+
+    public class ProductUpdateResponseModel
+    {
+        public int Total { get; set; }
+    }
+
+    public class ProductUpdateModel
+    {
+        public string ProductId { get; set; }
+        public int Quantity { get; set; }
     }
 }
