@@ -60,6 +60,10 @@ $apps = @(
         path = "DemoWebsite";
     },
     @{
+        name = "$namePrefix-member-points-service";
+        path = "DemoCustomerServicePoints";
+    },    
+    @{
         name = "$namePrefix-member-service";
         path = "DemoCustomerServiceMember";
     },
@@ -81,7 +85,7 @@ $apps = @(
     }
 )
 
-$version = "v4.4"
+$version = "v4.5"
 for ($i = 0; $i -lt $apps.Length; $i++) {
     $app = $apps[$i]
 

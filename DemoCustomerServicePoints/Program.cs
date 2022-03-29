@@ -1,9 +1,10 @@
-using DemoCustomerServiceMember.Core;
+using DemoCore;
+using DemoCustomerServicePoints.Core;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
-using DemoCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,14 +12,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 
-builder.Services.AddHttpClient<IAlternateMemberIdService, AlternateMemberIdService>();
-
 builder.Services.AddTransient<IDbServiceFactory, DbServiceFactory>();
-builder.Services.AddTransient<IRewardCustomerService, RewardCustomerService>();
+builder.Services.AddTransient<IPointsService, PointsService>();
 
 builder.Services.AddHealthChecks()
-    .AddCheck<AlternateMemberIdService>("AlternateMemberIdService")
-    .AddCheck<RewardCustomerService>("Database");
+    .AddCheck<PointsService>("Database");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
@@ -29,13 +27,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         });
 });
 
-
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>
 {
-    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Member Service API", Version = "v1" });
+    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Points Service API", Version = "v1" });
     option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -63,8 +60,12 @@ builder.Services.AddSwaggerGen(option =>
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseHttpsRedirection();
 
