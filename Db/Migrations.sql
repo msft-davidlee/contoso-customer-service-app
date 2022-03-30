@@ -17,6 +17,9 @@ BEGIN
     INSERT INTO RewardCustomers(MemberId,FirstName,LastName) VALUES('5484873335','Hami', 'Young')
     INSERT INTO RewardCustomers(MemberId,FirstName,LastName) VALUES('6543554443','Linda', 'Peters')
     INSERT INTO RewardCustomers(MemberId,FirstName,LastName) VALUES('5325553353','Frank', 'Chang')
+    INSERT INTO RewardCustomers(MemberId,FirstName,LastName) VALUES('5325553303','Mike', 'Chang')
+    INSERT INTO RewardCustomers(MemberId,FirstName,LastName) VALUES('5325553323','Larry', 'Chang')
+    INSERT INTO RewardCustomers(MemberId,FirstName,LastName) VALUES('5325553313','Hong', 'Chang')
 END
 
 IF NOT EXISTS (SELECT 1 from sysobjects where name='RewardCustomerPoints' and xtype='U')
@@ -36,6 +39,9 @@ BEGIN
     INSERT INTO RewardCustomerPoints(MemberId, Points) VALUES('5484873335', FLOOR(RAND()*(2000-100+1)+100))
     INSERT INTO RewardCustomerPoints(MemberId, Points) VALUES('6543554443', FLOOR(RAND()*(300-0+1)+0))
     INSERT INTO RewardCustomerPoints(MemberId, Points) VALUES('5325553353', FLOOR(RAND()*(300-10+1)+10))
+    INSERT INTO RewardCustomerPoints(MemberId, Points) VALUES('5325553303', FLOOR(RAND()*(300-10+1)+10))
+    INSERT INTO RewardCustomerPoints(MemberId, Points) VALUES('5325553323', FLOOR(RAND()*(300-10+1)+10))
+    INSERT INTO RewardCustomerPoints(MemberId, Points) VALUES('5325553313', FLOOR(RAND()*(300-10+1)+10))
 END
 
 IF NOT EXISTS (SELECT 1 from sysobjects where name='RewardItems' and xtype='U')
@@ -104,6 +110,9 @@ BEGIN
     INSERT INTO Products([Id],[Quantity],[Active]) VALUES('FFF02',9999999,1)
     INSERT INTO Products([Id],[Quantity],[Active]) VALUES('FFF03',8999999,1)
     INSERT INTO Products([Id],[Quantity],[Active]) VALUES('FFF04',7999999,1)
+    INSERT INTO Products([Id],[Quantity],[Active]) VALUES('FFF05',5999999,1)
+    INSERT INTO Products([Id],[Quantity],[Active]) VALUES('FFF06',6999999,1)
+    INSERT INTO Products([Id],[Quantity],[Active]) VALUES('FFF07',9999999,1)
 END
 
 IF NOT EXISTS (SELECT 1 from sysobjects where name='Orders' and xtype='U')

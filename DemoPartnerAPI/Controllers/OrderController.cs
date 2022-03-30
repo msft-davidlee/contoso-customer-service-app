@@ -1,6 +1,7 @@
 ﻿using DemoPartnerCore;
 using DemoPartnerCore.Models;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -28,6 +29,13 @@ namespace DemoPartnerAPI.Controllers
         public async Task<List<Order>> Get(string memberId)
         {
             return (await _orderService.ListOrders(memberId)).ToList();
+        }
+
+        [Route("orderId/{orderId}")]
+        [HttpGet]
+        public async Task<Order> GetByOrderId(Guid orderId)
+        {
+            return await _orderService.GetOrder(orderId);
         }
     }
 }
