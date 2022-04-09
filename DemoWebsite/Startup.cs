@@ -38,6 +38,7 @@ namespace DemoWebsite
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.EnableApplicationInsights(Configuration);
             services.AddLogging();
 
             services.AddSingleton<IManagedConfiguration>(new ManagedConfiguration(
@@ -61,19 +62,9 @@ namespace DemoWebsite
 
             if (IsAuth())
             {
-                //if (ConfigureForB2C())
-                //{
                 services.AddMicrosoftIdentityWebAppAuthentication(Configuration, "AzureAd")
                     .EnableTokenAcquisitionToCallDownstreamApi()
                     .AddInMemoryTokenCaches();
-                //}
-                //else
-                //{
-                //    services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-                //        .AddMicrosoftIdentityWebApp(Configuration.GetSection("AzureAd"))
-                //        .EnableTokenAcquisitionToCallDownstreamApi()
-                //        .AddInMemoryTokenCaches();
-                //}
 
                 var overrideHostname = Configuration["OverrideAuthRedirectHostName"];
                 if (!string.IsNullOrEmpty(overrideHostname))
@@ -132,12 +123,6 @@ namespace DemoWebsite
             if (IsAuth())
             {
                 svc.AddMicrosoftIdentityUI();
-
-                if (ConfigureForB2C())
-                {
-                    services.AddOptions();
-                    services.Configure<OpenIdConnectOptions>(Configuration.GetSection("AzureAd"));
-                }
             }
         }
 
@@ -183,13 +168,6 @@ namespace DemoWebsite
         {
             bool result;
             bool.TryParse(Configuration["EnableAuth"], out result);
-            return result;
-        }
-
-        private bool ConfigureForB2C()
-        {
-            bool result;
-            bool.TryParse(Configuration["ConfigureForB2C"], out result);
             return result;
         }
     }

@@ -33,6 +33,7 @@ namespace DemoStorageShippingFunc
                     });
             });
 
+            builder.Services.EnableApplicationInsights(configuration);
             builder.Services.AddTransient<IDbServiceFactory, DbServiceFactory>();
             builder.Services.AddTransient<IProductService, ProductService>();
             builder.Services.AddTransient<IOrderService, OrderService>();

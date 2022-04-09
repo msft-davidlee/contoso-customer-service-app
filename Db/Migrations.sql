@@ -1,5 +1,3 @@
-USE [app]
-
 IF NOT EXISTS (SELECT 1 from sysobjects where name='RewardCustomers' and xtype='U')
 	CREATE TABLE RewardCustomers ([MemberId] VARCHAR(10) NOT NULL, FirstName VARCHAR(25), LastName VARCHAR(25), PRIMARY KEY (MemberId))
 GO
@@ -129,6 +127,14 @@ BEGIN
     INSERT INTO AlternateIds(MemberId,[Value]) VALUES('7611334511','456121')
     INSERT INTO AlternateIds(MemberId,[Value]) VALUES('8549494944','909212')
     INSERT INTO AlternateIds(MemberId,[Value]) VALUES('5454667577','788112')
+END
+
+IF ((SELECT COUNT(1) FROM Promotions) = 0)
+BEGIN
+    INSERT INTO Promotions(SKU,[Multiplier]) VALUES('UY0122100',2)
+    INSERT INTO Promotions(SKU,[Multiplier]) VALUES('OO1334511',3)
+    INSERT INTO Promotions(SKU,[Multiplier]) VALUES('8549494DX',2)
+    INSERT INTO Promotions(SKU,[Multiplier]) VALUES('DUS872344',3)
 END
 
 SELECT COUNT(1) AS TOTAL_RewardCustomer FROM RewardCustomers

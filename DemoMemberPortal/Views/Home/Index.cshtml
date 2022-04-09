@@ -1,0 +1,25 @@
+﻿@{
+    ViewData["Title"] = "Contoso Coffee House - Member Portal";
+}
+
+<div class="text-center">
+    <h1 class="display-3">Welcome back!</h1>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Member Id</h5>
+            @User.MemberId()
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Registered email</h5>
+            @User.Email()
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Points</h5>
+            @ViewBag.Points
+        </div>
+    </div>
+</div>
