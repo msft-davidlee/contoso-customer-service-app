@@ -56,6 +56,10 @@ if ($LastExitCode -ne 0) {
 $namePrefix = "contoso-demo"
 $apps = @(
     @{
+        name = "$namePrefix-member-portal";
+        path = "DemoMemberPortal";
+    },
+    @{
         name = "$namePrefix-website";
         path = "DemoWebsite";
     },
@@ -85,7 +89,7 @@ $apps = @(
     }
 )
 
-$version = "v4.7"
+$version = "v5.0"
 for ($i = 0; $i -lt $apps.Length; $i++) {
     $app = $apps[$i]
 
@@ -135,10 +139,16 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
 Push-Location Db
 if ($BUILD_ENV -eq 'dev') {
     $dbFileName = "Migrations-$version-dev.sql"
+    $dacpac = "cch-$version-dev.dacpac"
 }
 else {
     $dbFileName = "Migrations-$version.sql"
+    $dacpac = "cch-$version.dacpac"
 }
+
 $url = "https://$AccountName.blob.core.windows.net/$ContainerName/" + $dbFileName + "?$sas"    
 azcopy_v10 copy "Migrations.sql" $url --overwrite=false
+
+$url = "https://$AccountName.blob.core.windows.net/$ContainerName/" + $dacpac + "?$sas"
+azcopy_v10 copy "cch.dacpac" $url --overwrite=false
 Pop-Location
