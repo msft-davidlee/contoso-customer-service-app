@@ -1,5 +1,6 @@
 using DemoCore;
 using DemoMemberPortal.Controllers;
+using DemoMemberPortal.Core;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -57,6 +58,10 @@ builder.Services.AddAuthentication()
 // https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#how-to-use-typed-clients-with-ihttpclientfactory
 builder.Services.AddHttpClient<HomeController>();
 
+builder.Services.AddTransient<IPointsService, PointsService>();
+builder.Services.AddHealthChecks()
+    .AddCheck<PointsService>("PointsService");
+
 builder.Services.AddControllersWithViews(options =>
 {
     var policy = new AuthorizationPolicyBuilder()
@@ -91,7 +96,7 @@ app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
     endpoints.MapRazorPages();
-    //endpoints.MapHealthChecks("/health").AllowAnonymous();
+    endpoints.MapHealthChecks("/health").AllowAnonymous();
 });
 
 app.Run();

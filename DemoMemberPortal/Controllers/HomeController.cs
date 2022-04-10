@@ -1,49 +1,27 @@
-﻿using DemoMemberPortal.Models;
+﻿using DemoMemberPortal.Core;
+using DemoMemberPortal.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web;
 using System.Diagnostics;
-using System.Net.Http.Headers;
 
 namespace DemoMemberPortal.Controllers
 {
-    [Authorize]
-    [AuthorizeForScopes(ScopeKeySection = "AzureAd:Scopes")]
+    [Authorize(AuthenticationSchemes = "B2C")]
     public class HomeController : Controller
     {
-        private readonly ITokenAcquisition _tokenAcquisition;
-        private readonly HttpClient _httpClient;
-        private readonly IConfiguration _configuration;
+        private readonly IPointsService _pointsService;
 
-        public HomeController(ITokenAcquisition tokenAcquisition,
-            HttpClient httpClient,
-            IConfiguration configuration)
+        public HomeController(IPointsService pointsService)
         {
-            _tokenAcquisition = tokenAcquisition;
-            _httpClient = httpClient;
-            _configuration = configuration;
+            _pointsService = pointsService;
         }
 
+        [AuthorizeForScopes(ScopeKeySection = "AzureAd:Scopes")]
         public async Task<IActionResult> Index()
         {
-            var memberId = User.MemberId();
-            var client = await GetHttpClient();
-            var uri = $"{_configuration["MemberPointsUrl"]}api/points/member/{memberId}";
-            var points = await client.GetFromJsonAsync<MemberPointModel>(uri);
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            ViewData["Points"] = points.TotalPoints;
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
+            ViewData["Points"] = await _pointsService.GetPoints(User.MemberId());
             return View();
-        }
-
-        protected async Task<HttpClient> GetHttpClient()
-        {
-            var token = await _tokenAcquisition.GetAccessTokenForAppAsync(_configuration["AzureAD:Scopes"]);
-
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-            return _httpClient;
         }
 
         [AllowAnonymous]
