@@ -2,6 +2,8 @@ on:
   push:
     paths-ignore: 
       - 'README.md'
+env:
+  APP_VERSION: 'v5.1'
 
 jobs:
   setup:
@@ -56,4 +58,4 @@ jobs:
 
       - id: buid-and-deploy
         name: Build apps and container images
-        run: .\Deployment\Build.ps1 -BUILD_ENV ${{ needs.setup.outputs.build_env }}
+        run: .\Deployment\Build.ps1 -BUILD_ENV ${{ needs.setup.outputs.build_env }} -APP_VERSION ${{ env.APP_VERSION }}
