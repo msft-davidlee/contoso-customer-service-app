@@ -73,12 +73,12 @@ namespace DemoPartnerAPI
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            // TODO: Make this configurable.
-            //app.UseHttpsRedirection();
+            
+            app.UseHttpsRedirection();
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
