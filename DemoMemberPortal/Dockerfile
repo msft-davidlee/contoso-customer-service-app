@@ -1,6 +1,5 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-ARG APPVERSION
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
 EXPOSE 80
@@ -15,7 +14,9 @@ WORKDIR "/src/DemoMemberPortal"
 RUN dotnet build "DemoMemberPortal.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "DemoMemberPortal.csproj" /p:Version=$APPVERSION -c Release -o /app/publish
+ARG APPVERSION
+ENV APPVERSION_ENV=$APPVERSION
+RUN dotnet publish "DemoMemberPortal.csproj" /p:Version=$APPVERSION_ENV -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
