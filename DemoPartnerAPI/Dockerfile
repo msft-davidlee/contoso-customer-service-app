@@ -14,6 +14,7 @@ WORKDIR "/src/DemoPartnerAPI"
 RUN dotnet build "DemoPartnerAPI.csproj" -c Release -o /app/build
 
 FROM build AS publish
+ARG version
 RUN dotnet publish "DemoPartnerAPI.csproj" /p:Version=$version -c Release -o /app/publish
 
 FROM base AS final

@@ -124,7 +124,7 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
             $appFileName = ("$appName-$APP_VERSION" + ".zip")
         }
         
-        dotnet publish -c Release -o out /p:Version=$APP_VERSION
+        dotnet publish -c Release -o out /p:Version=$ver
     
         Compress-Archive out\* -DestinationPath $appFileName -Force
     
