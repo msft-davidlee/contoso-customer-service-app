@@ -44,8 +44,9 @@ if (!string.IsNullOrEmpty(overrideHostname))
     });
 }
 
-// See: https://github.com/AzureAD/microsoft-identity-web/wiki/Multiple-Authentication-Schemes
+builder.Services.AddManagedConfiguration<Program>();
 
+// See: https://github.com/AzureAD/microsoft-identity-web/wiki/Multiple-Authentication-Schemes
 // Add services to the container.
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAdB2C"), "B2C", "cookiesB2C");

@@ -33,17 +33,13 @@ namespace DemoWebsite
             return string.Equals(Environment.GetEnvironmentVariable("ASPNETCORE_FORWARDEDHEADERS_ENABLED"), "true", StringComparison.OrdinalIgnoreCase);
         }
 
-        private const string VersionFileName = "version.txt";
-
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.EnableApplicationInsights(Configuration);
             services.AddLogging();
 
-            services.AddSingleton<IManagedConfiguration>(new ManagedConfiguration(
-                File.Exists(VersionFileName) ? File.ReadAllText(VersionFileName) : null,
-                Environment.MachineName));
+            services.AddManagedConfiguration<Program>();
 
             // https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/proxy-load-balancer?view=aspnetcore-6.0#forward-the-scheme-for-linux-and-non-iis-reverse-proxies
             if (IsForwardHeaderEnabled())

@@ -1,10 +1,12 @@
 ﻿using DemoPartnerCore;
 using DemoPartnerCore.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
 namespace DemoPartnerAPI.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class ProductController : ControllerBase

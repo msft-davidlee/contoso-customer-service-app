@@ -14,7 +14,7 @@ WORKDIR "/src/DemoMemberPortal"
 RUN dotnet build "DemoMemberPortal.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "DemoMemberPortal.csproj" -c Release -o /app/publish
+RUN dotnet publish "DemoMemberPortal.csproj" /p:Version=${version} -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app

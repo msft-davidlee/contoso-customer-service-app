@@ -1,10 +1,21 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace DemoCore
 {
     public static class Extensions
     {
+        private const string VersionFileName = "version.txt";
+
+        public static void AddManagedConfiguration<T>(this IServiceCollection services)
+        {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+            string version = Assembly.GetAssembly(typeof(T)).GetName().Version.ToString();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+            services.AddSingleton<IManagedConfiguration>(new ManagedConfiguration(version, Environment.MachineName));
+        }
+
         public static string GetConnectionString(this IConfiguration configuration)
         {
             var dbDataSource = configuration["DbSource"];

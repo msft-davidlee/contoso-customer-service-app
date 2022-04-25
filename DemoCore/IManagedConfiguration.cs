@@ -1,9 +1,10 @@
-﻿namespace DemoWebsite.Core
+﻿namespace DemoCore
 {
     public interface IManagedConfiguration
     {
         string Version { get; }
         string MachineName { get; }
+        string Details { get; }
     }
 
     public class ManagedConfiguration : IManagedConfiguration
@@ -17,11 +18,16 @@
             _machineName = machineName;
         }
 
+        public string Details
+        {
+            get { return $"{_version} | {_machineName}"; }
+        }
+
         public string Version
         {
             get
             {
-                return string.IsNullOrEmpty(_version) ? "1.0" : _version;
+                return string.IsNullOrEmpty(_version) ? "0" : _version;
             }
         }
 
