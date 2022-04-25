@@ -14,9 +14,8 @@ WORKDIR "/src/DemoMemberPortal"
 RUN dotnet build "DemoMemberPortal.csproj" -c Release -o /app/build
 
 FROM build AS publish
-ARG APPVERSION
-ENV APPVERSION_ENV=$APPVERSION
-RUN dotnet publish "DemoMemberPortal.csproj" /p:Version=$APPVERSION_ENV -c Release -o /app/publish
+ARG version
+RUN dotnet publish "DemoMemberPortal.csproj" /p:Version=$version -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
