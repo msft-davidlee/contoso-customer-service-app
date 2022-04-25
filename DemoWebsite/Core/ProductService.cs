@@ -23,7 +23,7 @@ namespace DemoWebsite.Core
 
         public async Task<bool> IsInStock(string productId)
         {
-            var uri = $"{GetBaseUri()}/product?productId={productId}";
+            var uri = $"{GetBaseUri()}product?productId={productId}";
             var response = await (await GetHttpClient()).GetAsync(new Uri(uri));
             response.EnsureSuccessStatusCode();
 

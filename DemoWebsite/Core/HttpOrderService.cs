@@ -21,7 +21,7 @@ namespace DemoWebsite.Core
 
         public async Task<OrderResponse> PlaceOrder(string productId, string memberId)
         {
-            var uri = $"{GetBaseUri()}/order";
+            var uri = $"{GetBaseUri()}order";
             var content = new StringContent(JsonConvert.SerializeObject(new { productId, memberId }));
 
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
@@ -36,7 +36,7 @@ namespace DemoWebsite.Core
 
         public async Task<IEnumerable<Order>> ListOrders(string memberId)
         {
-            var uri = $"{GetBaseUri()}/order?memberId={memberId}";
+            var uri = $"{GetBaseUri()}order?memberId={memberId}";
             var response = await (await GetHttpClient()).GetAsync(new Uri(uri));
             response.EnsureSuccessStatusCode();
 
