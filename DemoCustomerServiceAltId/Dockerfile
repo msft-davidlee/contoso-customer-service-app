@@ -14,7 +14,7 @@ WORKDIR "/src/DemoCustomerServiceAltId"
 RUN dotnet build "DemoCustomerServiceAltId.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "DemoCustomerServiceAltId.csproj" /p:Version=${version} -c Release -o /app/publish
+RUN dotnet publish "DemoCustomerServiceAltId.csproj" /p:Version=$version -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
