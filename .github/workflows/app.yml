@@ -3,7 +3,7 @@ on:
     paths-ignore: 
       - 'README.md'
 env:
-  APP_VERSION: 'v5.7'
+  APP_VERSION: 'v5.14'
 
 jobs:
   setup:
