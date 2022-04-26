@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Identity.Web;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -8,59 +9,50 @@ using System.Threading.Tasks;
 
 namespace DemoWebsite.Core
 {
-    public class HttpOrderService : IOrderService
-    {
-        private readonly IConfiguration _configuration;
+    public class HttpOrderService : MicroserviceBase, IOrderService
+    {        
         private readonly IRewardItemService _rewardItemService;
-        private static readonly HttpClient _client = new HttpClient();
 
-        public HttpOrderService(IConfiguration configuration, IRewardItemService rewardItemService)
-        {
-            _configuration = configuration;
+        public HttpOrderService(IConfiguration configuration, IRewardItemService rewardItemService,
+            HttpClient httpClient, ITokenAcquisition tokenAcquisition) : base(tokenAcquisition, configuration, httpClient)
+        {            
             _rewardItemService = rewardItemService;
         }
 
         public async Task<OrderResponse> PlaceOrder(string productId, string memberId)
         {
-            var partnerApiUri = _configuration["PartnerAPIUri"];
-            if (!string.IsNullOrEmpty(partnerApiUri))
-            {
-                var uri = $"{partnerApiUri}/order";
-                var content = new StringContent(JsonConvert.SerializeObject(new { productId, memberId }));
+            var uri = $"{GetBaseUri()}order";
+            var content = new StringContent(JsonConvert.SerializeObject(new { productId, memberId }));
 
-                content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-                var response = await _client.PostAsync(new Uri(uri), content);
-                response.EnsureSuccessStatusCode();
+            var response = await (await GetHttpClient()).PostAsync(new Uri(uri), content);
+            response.EnsureSuccessStatusCode();
 
-                return JsonConvert.DeserializeObject<OrderResponse>(await response.Content.ReadAsStringAsync());
+            return JsonConvert.DeserializeObject<OrderResponse>(await response.Content.ReadAsStringAsync());
 
-                throw new ApplicationException("Return payload is not valid.");
-            }
-
-            throw new ApplicationException("PartnerAPIUri is not configured.");
+            throw new ApplicationException("Return payload is not valid.");
         }
 
         public async Task<IEnumerable<Order>> ListOrders(string memberId)
         {
-            var partnerApiUri = _configuration["PartnerAPIUri"];
-            if (!string.IsNullOrEmpty(partnerApiUri))
+            var uri = $"{GetBaseUri()}order?memberId={memberId}";
+            var response = await (await GetHttpClient()).GetAsync(new Uri(uri));
+            response.EnsureSuccessStatusCode();
+
+            var orders = JsonConvert.DeserializeObject<List<Order>>(await response.Content.ReadAsStringAsync());
+
+            foreach (var order in orders)
             {
-                var uri = $"{partnerApiUri}/order?memberId={memberId}";
-                var response = await _client.GetAsync(new Uri(uri));
-                response.EnsureSuccessStatusCode();
-
-                var orders = JsonConvert.DeserializeObject<List<Order>>(await response.Content.ReadAsStringAsync());
-
-                foreach (var order in orders)
-                {
-                    order.ProductName = (await _rewardItemService.GetRewardItem(order.ProductId)).Name;
-                }
-
-                return orders;
+                order.ProductName = (await _rewardItemService.GetRewardItem(order.ProductId)).Name;
             }
 
-            throw new ApplicationException("PartnerAPIUri is not configured.");
+            return orders;
+        }
+
+        protected override string GetUriConfigName()
+        {
+            return "PartnerAPIUri";
         }
     }
 }

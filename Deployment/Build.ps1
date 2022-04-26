@@ -108,7 +108,8 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
 
     if ($shouldBuild -eq $true) {
         # Build your app with ACR build command
-        az acr build --image $imageName --build-arg version=$APP_VERSION -r $AcrName --file ./$path/Dockerfile .
+        $ver = $APP_VERSION.Replace("v", "")
+        az acr build --image $imageName --build-arg version=$ver -r $AcrName --file ./$path/Dockerfile .
     
         if ($LastExitCode -ne 0) {
             throw "An error has occured. Unable to build image."
@@ -123,7 +124,7 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
             $appFileName = ("$appName-$APP_VERSION" + ".zip")
         }
         
-        dotnet publish -c Release -o out /p:Version=$APP_VERSION
+        dotnet publish -c Release -o out /p:Version=$ver
     
         Compress-Archive out\* -DestinationPath $appFileName -Force
     

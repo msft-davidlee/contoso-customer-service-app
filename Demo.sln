@@ -34,7 +34,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoCustomerServiceMember",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoCustomerServicePoints", "DemoCustomerServicePoints\DemoCustomerServicePoints.csproj", "{22DCBCAC-77A0-427D-91CA-6CF24AB1094E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoMemberPortal", "DemoMemberPortal\DemoMemberPortal.csproj", "{90F652A2-7A2C-4F53-AABA-6468A20CCF8A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoMemberPortal", "DemoMemberPortal\DemoMemberPortal.csproj", "{90F652A2-7A2C-4F53-AABA-6468A20CCF8A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

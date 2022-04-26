@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Identity.Web;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace DemoWebsite.Core
@@ -13,66 +13,40 @@ namespace DemoWebsite.Core
         Task<bool> IsInStock(string productId);
     }
 
-    public class ProductService : IProductService, IHealthCheck
+    public class ProductService : MicroserviceBase, IProductService, IHealthCheck
     {
-        private readonly IConfiguration _configuration;
-        private static readonly HttpClient _client = new HttpClient();
-
-        public ProductService(IConfiguration configuration)
+        public ProductService(IConfiguration configuration, HttpClient httpClient, ITokenAcquisition tokenAcquisition)
+            : base(tokenAcquisition, configuration, httpClient)
         {
-            _configuration = configuration;
+
         }
 
         public async Task<bool> IsInStock(string productId)
         {
-            var partnerApiUri = _configuration["PartnerAPIUri"];
-            if (!string.IsNullOrEmpty(partnerApiUri))
+            var uri = $"{GetBaseUri()}product?productId={productId}";
+            var response = await (await GetHttpClient()).GetAsync(new Uri(uri));
+            response.EnsureSuccessStatusCode();
+
+            var o = JObject.Parse(await response.Content.ReadAsStringAsync());
+            if (bool.TryParse(o["active"].ToString(), out bool active))
             {
-                var uri = $"{partnerApiUri}/product?productId={productId}";
-                var response = await _client.GetAsync(new Uri(uri));
-                response.EnsureSuccessStatusCode();
-
-                var o = JObject.Parse(await response.Content.ReadAsStringAsync());
-                if (bool.TryParse(o["active"].ToString(), out bool active))
+                if (!active)
                 {
-                    if (!active)
-                    {
-                        return false;
-                    }
-
-                    if (int.TryParse(o["quantity"].ToString(), out int quantity))
-                    {
-                        return quantity > 0;
-                    }
+                    return false;
                 }
 
-                throw new ApplicationException("Return payload is not valid.");
+                if (int.TryParse(o["quantity"].ToString(), out int quantity))
+                {
+                    return quantity > 0;
+                }
             }
 
-            throw new ApplicationException("PartnerAPIUri is not configured.");
+            throw new ApplicationException("Return payload is not valid.");
         }
 
-        public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+        protected override string GetUriConfigName()
         {
-            var partnerApiUri = _configuration["PartnerAPIUri"];
-            if (string.IsNullOrEmpty(partnerApiUri))
-            {
-                return HealthCheckResult.Unhealthy();
-            }
-
-            var uri = $"{partnerApiUri}/health";
-
-            try
-            {
-                var response = await _client.GetAsync(new Uri(uri));
-                response.EnsureSuccessStatusCode();
-
-                return HealthCheckResult.Healthy();
-            }
-            catch
-            {
-                return HealthCheckResult.Unhealthy();
-            }
+            return "PartnerAPIUri";
         }
     }
 }
