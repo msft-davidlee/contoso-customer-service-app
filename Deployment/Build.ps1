@@ -4,32 +4,10 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$platformRes = (az resource list --tag stack-name=shared-container-registry | ConvertFrom-Json)
-if (!$platformRes) {
-    throw "Unable to find eligible platform container registry!"
-}
-if ($platformRes.Length -eq 0) {
-    throw "Unable to find 'ANY' eligible platform container registry!"
-}
-
-$acr = ($platformRes | Where-Object { $_.tags.'stack-environment' -eq 'prod' })
-if (!$acr) {
-    throw "Unable to find eligible prod container registry!"
-}
+$acr = (az resource list --tag stack-name=shared-container-registry | ConvertFrom-Json)
 $AcrName = $acr.Name
 
-$platformRes = (az resource list --tag stack-name=shared-storage | ConvertFrom-Json)
-if (!$platformRes) {
-    throw "Unable to find eligible platform storage!"
-}
-if ($platformRes.Length -eq 0) {
-    throw "Unable to find 'ANY' eligible platform storage!"
-}
-
-$str = ($platformRes | Where-Object { $_.tags.'stack-environment' -eq 'prod' })
-if (!$str) {
-    throw "Unable to find eligible storage account!"
-}
+$str = (az resource list --tag stack-name=shared-storage | ConvertFrom-Json)
 $AccountName = $str.Name
 $ContainerName = "apps"
 
