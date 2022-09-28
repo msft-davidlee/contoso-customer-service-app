@@ -4,10 +4,10 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$acr = (az resource list --tag stack-name=shared-container-registry | ConvertFrom-Json)
+$acr = (az resource list --tag ard-resource-id=shared-container-registry | ConvertFrom-Json)
 $AcrName = $acr.Name
 
-$str = (az resource list --tag stack-name=shared-storage | ConvertFrom-Json)
+$str = (az resource list --tag ard-resource-id=shared-storage | ConvertFrom-Json)
 $AccountName = $str.Name
 $ContainerName = "apps"
 
