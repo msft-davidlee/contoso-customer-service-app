@@ -40,7 +40,7 @@ namespace DemoCore
         public static void EnableApplicationInsights(this IServiceCollection services, IConfiguration configuration)
         {
             // See: https://github.com/microsoft/ApplicationInsights-Kubernetes
-            var appInsightsConnectionString = configuration["ApplicationInsights:ConnectionString"];
+            var appInsightsConnectionString = configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"];
             if (!string.IsNullOrEmpty(appInsightsConnectionString))
             {
                 services.AddApplicationInsightsTelemetry();
