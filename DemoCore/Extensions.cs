@@ -40,10 +40,10 @@ namespace DemoCore
         public static void EnableApplicationInsights(this IServiceCollection services, IConfiguration configuration)
         {
             // See: https://github.com/microsoft/ApplicationInsights-Kubernetes
-            var appInsightsInstrumentationKey = configuration["AppInsightsInstrumentationKey"];
-            if (!string.IsNullOrEmpty(appInsightsInstrumentationKey))
+            var appInsightsConnectionString = configuration["ApplicationInsights:ConnectionString"];
+            if (!string.IsNullOrEmpty(appInsightsConnectionString))
             {
-                services.AddApplicationInsightsTelemetry(appInsightsInstrumentationKey);
+                services.AddApplicationInsightsTelemetry();
                 services.AddApplicationInsightsKubernetesEnricher();
             }
         }
