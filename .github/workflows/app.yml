@@ -22,7 +22,7 @@ jobs:
       build_env: ${{ steps.setup.outputs.build_env }}
 
   test_apps:
-    name: Build and Deploy
+    name: Test Apps
     needs: setup
     runs-on: windows-latest
     steps:
@@ -47,7 +47,7 @@ jobs:
           files: ${{ env.RUNNER_TEMP }}/TestResults/*.xml
 
   publish_apps:
-    name: publishing app
+    name: Publishing App
     runs-on: windows-latest
     needs:
       - setup
@@ -74,12 +74,12 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           enable-AzPSSession: true
 
-      - id: deployapp
-        name: Build apps and container images
+      - id: publishapp
+        name: Publish ${{ matrix.appPath }} container image
         run: .\Deployment\Build.ps1 -APP_PATH ${{ matrix.appPath }} -BUILD_ENV ${{ needs.setup.outputs.build_env }} -APP_VERSION ${{ env.APP_VERSION }}
 
   publish_db:
-    name: publishing db
+    name: Publish DB
     runs-on: windows-latest
     needs:
       - setup
