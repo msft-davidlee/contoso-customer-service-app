@@ -76,7 +76,7 @@ jobs:
 
       - id: publishapp
         name: Publish ${{ matrix.appPath }} container image
-        run: .\Deployment\Build.ps1 -REPO_PATH $env:GITHUB_WORKSPACE -APP_PATH ${{ matrix.appPath }} -BUILD_ENV ${{ needs.setup.outputs.build_env }} -APP_VERSION ${{ env.APP_VERSION }}
+        run: .\Deployment\Build.ps1 -APP_PATH ${{ matrix.appPath }} -BUILD_ENV ${{ needs.setup.outputs.build_env }} -APP_VERSION ${{ env.APP_VERSION }}
 
   publish_db:
     name: Publish DB
