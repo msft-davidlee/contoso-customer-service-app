@@ -27,7 +27,7 @@ if ($LastExitCode -ne 0) {
     throw "An error has occured. Unable to login to acr."
 }
 
-$app = Get-Content -Path "..\$APP_PATH\manifest.json" | ConvertFrom-Json
+$app = Get-Content -Path "$APP_PATH\manifest.json" | ConvertFrom-Json
 
 $appName = $app.name
 $path = $APP_PATH 
