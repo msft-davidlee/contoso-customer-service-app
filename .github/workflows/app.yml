@@ -74,6 +74,10 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           enable-AzPSSession: true
 
+      - uses: kheiakiyama/install-azcopy-action@v1
+        with:
+          version: 'v10'          
+
       - id: publishapp
         name: Publish ${{ matrix.appPath }} container image
         run: .\Deployment\Build.ps1 -APP_PATH ${{ matrix.appPath }} -BUILD_ENV ${{ needs.setup.outputs.build_env }} -APP_VERSION ${{ env.APP_VERSION }}
