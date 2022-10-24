@@ -1,6 +1,7 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
 #See https://mcr.microsoft.com/v2/azure-functions/dotnet/tags/list
-FROM mcr.microsoft.com/azure-functions/dotnet:4.13.0-dotnet6-appservice AS base
+#See https://hub.docker.com/_/microsoft-azure-functions-dotnet
+FROM mcr.microsoft.com/azure-functions/dotnet:4-dotnet6-appservice AS base
 WORKDIR /home/site/wwwroot
 EXPOSE 80
 
