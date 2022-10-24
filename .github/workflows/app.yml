@@ -1,9 +1,9 @@
-on: 
+on:
   push:
-    paths-ignore: 
+    paths-ignore:
       - 'README.md'
 env:
-  APP_VERSION: 'v6.6'
+  APP_VERSION: 'v6.7'
 
 jobs:
   setup:
@@ -13,18 +13,18 @@ jobs:
       - id: setup
         name: Setup Environment Setp
         run: |
-            if ('${{ github.ref }}' -eq 'refs/heads/main') { 
-              echo "::set-output name=build_env::prod"
-            } else {
-              echo "::set-output name=build_env::dev"
-            }
+          if ('${{ github.ref }}' -eq 'refs/heads/main') { 
+            echo "build_env=prod" >> $env:GITHUB_OUTPUT
+          } else {
+            echo "build_env=dev"  >> $env:GITHUB_OUTPUT
+          }
     outputs:
       build_env: ${{ steps.setup.outputs.build_env }}
 
-  build_deploy:
-    name: Build and Deploy 
-    needs: setup   
-    runs-on: windows-latest  
+  test_apps:
+    name: Build and Deploy
+    needs: setup
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3.1.0
 
@@ -36,9 +36,9 @@ jobs:
       - id: integrationtest
         name: Integration Tests
         run: |
-            $unitTestFilePath = "${{ env.RUNNER_TEMP }}\TestResults\unittests.xml"
-            Push-Location .\DemoWebsiteTests\
-            dotnet test --logger "junit;LogFilePath=$unitTestFilePath"
+          $unitTestFilePath = "${{ env.RUNNER_TEMP }}\TestResults\unittests.xml"
+          Push-Location .\DemoWebsiteTests\
+          dotnet test --logger "junit;LogFilePath=$unitTestFilePath"
 
       - name: Publish test results
         if: ${{ always() }}
@@ -46,16 +46,57 @@ jobs:
         with:
           files: ${{ env.RUNNER_TEMP }}/TestResults/*.xml
 
-      - uses: kheiakiyama/install-azcopy-action@v1
-        with:
-          version: 'v10'
-
+  publish_apps:
+    name: publishing app
+    runs-on: windows-latest
+    needs:
+      - setup
+      - test_apps
+    environment: ${{ needs.setup.outputs.build_env }}
+    strategy:
+      matrix:
+        appPath:
+          [
+            'DemoWebsite',
+            'DemoMemberPortal',
+            'DemoCustomerServicePoints',
+            'DemoCustomerServiceMember',
+            'DemoCustomerServiceAltId',
+            'DemoPartnerAPI',
+            'DemoServiceBusShippingFunc',
+            'DemoStorageShippingFunc',
+          ]
+    steps:
+      - uses: actions/checkout@v3
       - name: Azure CLI Login
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           enable-AzPSSession: true
 
-      - id: buid-and-deploy
+      - id: deployapp
         name: Build apps and container images
-        run: .\Deployment\Build.ps1 -BUILD_ENV ${{ needs.setup.outputs.build_env }} -APP_VERSION ${{ env.APP_VERSION }}
+        run: .\Deployment\Build.ps1 -APP_PATH ${{ matrix.appPath }} -BUILD_ENV ${{ needs.setup.outputs.build_env }} -APP_VERSION ${{ env.APP_VERSION }}
+
+  publish_db:
+    name: publishing db
+    runs-on: windows-latest
+    needs:
+      - setup
+      - test_apps
+    environment: ${{ needs.setup.outputs.build_env }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Azure CLI Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          enable-AzPSSession: true
+
+      - uses: kheiakiyama/install-azcopy-action@v1
+        with:
+          version: 'v10'
+
+      - id: deploydb
+        name: Deploy db
+        run: .\Deployment\Db.ps1 -BUILD_ENV ${{ needs.setup.outputs.build_env }} -APP_VERSION ${{ env.APP_VERSION }}

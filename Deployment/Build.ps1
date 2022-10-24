@@ -1,5 +1,6 @@
 param(
     [string]$BUILD_ENV,
+    [string]$APP_PATH,
     [Parameter(Mandatory = $true)][string]$APP_VERSION)
 
 $ErrorActionPreference = "Stop"
@@ -26,111 +27,54 @@ if ($LastExitCode -ne 0) {
     throw "An error has occured. Unable to login to acr."
 }
 
-# Do not change this as this affect container reg
-$namePrefix = "contoso-demo"
-$apps = @(
-    @{
-        name = "$namePrefix-member-portal";
-        path = "DemoMemberPortal";
-    },
-    @{
-        name = "$namePrefix-website";
-        path = "DemoWebsite";
-    },
-    @{
-        name = "$namePrefix-member-points-service";
-        path = "DemoCustomerServicePoints";
-    },    
-    @{
-        name = "$namePrefix-member-service";
-        path = "DemoCustomerServiceMember";
-    },
-    @{
-        name = "$namePrefix-alternate-id-service";
-        path = "DemoCustomerServiceAltId";
-    },
-    @{
-        name = "$namePrefix-partner-api";
-        path = "DemoPartnerAPI";
-    },
-    @{
-        name = "$namePrefix-service-bus-shipping-func";
-        path = "DemoServiceBusShippingFunc";
-    },
-    @{
-        name = "$namePrefix-storage-queue-func";
-        path = "DemoStorageShippingFunc";
+$app = Get-Content -Path $APP_PATH | ConvertFrom-Json
+
+$appName = $app.name
+$path = $APP_PATH 
+
+$imageName = "$appName`:$APP_VERSION"
+
+if ($BUILD_ENV -eq 'dev') {
+    $imageName = "$imageName-$BUILD_ENV"
+}    
+
+$shouldBuild = $true
+$tags = az acr repository show-tags --name $AcrName --repository $appName | ConvertFrom-Json
+if ($tags) {
+    if ($tags.Contains($APP_VERSION)) {
+        $shouldBuild = $false
     }
-)
+}
 
+if ($shouldBuild -eq $true) {
+    # Build your app with ACR build command
+    $ver = $APP_VERSION.Replace("v", "")
+    az acr build --image $imageName --build-arg version=$ver -r $AcrName --file ./$path/Dockerfile .
 
-for ($i = 0; $i -lt $apps.Length; $i++) {
-    $app = $apps[$i]
+    if ($LastExitCode -ne 0) {
+        throw "An error has occured. Unable to build image."
+    }
 
-    $appName = $app.name
-    $path = $app.path    
-
-    $imageName = "$appName`:$APP_VERSION"
+    Push-Location $path
 
     if ($BUILD_ENV -eq 'dev') {
-        $imageName = "$imageName-$BUILD_ENV"
-    }    
+        $appFileName = ("$appName-$APP_VERSION-dev" + ".zip")
+    }
+    else {
+        $appFileName = ("$appName-$APP_VERSION" + ".zip")
+    }
+    
+    dotnet publish -c Release -o out /p:Version=$ver
 
-    $shouldBuild = $true
-    $tags = az acr repository show-tags --name $AcrName --repository $appName | ConvertFrom-Json
-    if ($tags) {
-        if ($tags.Contains($APP_VERSION)) {
-            $shouldBuild = $false
-        }
+    Compress-Archive out\* -DestinationPath $appFileName -Force
+
+    # Seem like question mark is causing appfilename to be removed
+    $url = "https://$AccountName.blob.core.windows.net/$ContainerName/" + $appFileName + "?$sas"    
+    azcopy_v10 copy $appFileName $url --overwrite=false
+
+    if ($LastExitCode -ne 0) {
+        throw "An error has occured. Unable to deploy zip."
     }
 
-    if ($shouldBuild -eq $true) {
-        # Build your app with ACR build command
-        $ver = $APP_VERSION.Replace("v", "")
-        az acr build --image $imageName --build-arg version=$ver -r $AcrName --file ./$path/Dockerfile .
-    
-        if ($LastExitCode -ne 0) {
-            throw "An error has occured. Unable to build image."
-        }
-
-        Push-Location $path
-
-        if ($BUILD_ENV -eq 'dev') {
-            $appFileName = ("$appName-$APP_VERSION-dev" + ".zip")
-        }
-        else {
-            $appFileName = ("$appName-$APP_VERSION" + ".zip")
-        }
-        
-        dotnet publish -c Release -o out /p:Version=$ver
-    
-        Compress-Archive out\* -DestinationPath $appFileName -Force
-    
-        # Seem like question mark is causing appfilename to be removed
-        $url = "https://$AccountName.blob.core.windows.net/$ContainerName/" + $appFileName + "?$sas"    
-        azcopy_v10 copy $appFileName $url --overwrite=false
-    
-        if ($LastExitCode -ne 0) {
-            throw "An error has occured. Unable to deploy zip."
-        }
-    
-        Pop-Location
-    }
+    Pop-Location
 }
-
-Push-Location Db
-if ($BUILD_ENV -eq 'dev') {
-    $dbFileName = "Migrations-$APP_VERSION-dev.sql"
-    $dacpac = "cch-$APP_VERSION-dev.dacpac"
-}
-else {
-    $dbFileName = "Migrations-$APP_VERSION.sql"
-    $dacpac = "cch-$APP_VERSION.dacpac"
-}
-
-$url = "https://$AccountName.blob.core.windows.net/$ContainerName/" + $dbFileName + "?$sas"    
-azcopy_v10 copy "Migrations.sql" $url --overwrite=false
-
-$url = "https://$AccountName.blob.core.windows.net/$ContainerName/" + $dacpac + "?$sas"
-azcopy_v10 copy "cch.dacpac" $url --overwrite=false
-Pop-Location
