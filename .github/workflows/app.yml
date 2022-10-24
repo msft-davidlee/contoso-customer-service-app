@@ -42,7 +42,7 @@ jobs:
 
       - name: Publish test results
         if: ${{ always() }}
-        uses: EnricoMi/publish-unit-test-result-action/composite@v1
+        uses: EnricoMi/publish-unit-test-result-action/composite@v2
         with:
           files: ${{ env.RUNNER_TEMP }}/TestResults/*.xml
 
