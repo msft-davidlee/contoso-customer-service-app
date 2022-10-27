@@ -44,7 +44,11 @@ namespace DemoCore
             if (!string.IsNullOrEmpty(appInsightsConnectionString))
             {
                 services.AddApplicationInsightsTelemetry();
-                services.AddApplicationInsightsKubernetesEnricher();
+
+                var isAzureFunction = !string.IsNullOrEmpty(configuration["FUNCTIONS_WORKER_RUNTIME"]);
+
+                // Currently, this will not work for Azure Functions
+                if (!isAzureFunction) services.AddApplicationInsightsKubernetesEnricher();
             }
         }
     }
