@@ -8,6 +8,7 @@ namespace DemoServiceBusShippingFunc
 {
     public class ShippingFunction
     {
+        private const string PingTest = "ping";
         private readonly IShippingService _shippingService;
 
         public ShippingFunction(IShippingService shippingService)
@@ -18,7 +19,11 @@ namespace DemoServiceBusShippingFunc
         [FunctionName("Shipping")]
         public async Task Run([ServiceBusTrigger("%QueueName%", Connection = "Connection")] string myQueueItem, ILogger log)
         {
-            log.LogInformation($"ServiceBus queue trigger function processed message: {myQueueItem}");
+            if (myQueueItem.StartsWith(PingTest))
+            {
+                log.LogInformation($"Ping test mesage: {myQueueItem}");
+                return;
+            }
 
             await _shippingService.Process(Guid.Parse(myQueueItem));
         }
