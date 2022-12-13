@@ -26,7 +26,7 @@ jobs:
     needs: setup
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3.1.0
+      - uses: actions/checkout@v3.2.0
 
       - name: Setup .NET 6
         uses: actions/setup-dotnet@v3
@@ -67,7 +67,7 @@ jobs:
             'DemoStorageShippingFunc',
           ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3.2.0
       - name: Azure CLI Login
         uses: azure/login@v1
         with:
@@ -90,7 +90,7 @@ jobs:
       - test_apps
     environment: ${{ needs.setup.outputs.build_env }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3.2.0
       - name: Azure CLI Login
         uses: azure/login@v1
         with:
